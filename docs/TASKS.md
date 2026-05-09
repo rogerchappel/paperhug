@@ -56,8 +56,8 @@ Status: done
 - [x] Smoke-test prompt-only card generation.
 - [x] Run `npm test`.
 - [x] Run `npm run smoke`.
-- [ ] Run `bash scripts/validate.sh` after documentation updates.
-- [ ] Run `npm run release:check` before tagging.
+- [x] Run `bash scripts/validate.sh` after documentation updates.
+- [x] Run `npm run release:check` before tagging.
 
 ## Wave 5 — Publish and release
 
