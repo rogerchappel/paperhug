@@ -61,13 +61,13 @@ Status: done
 
 ## Wave 5 — Publish and release
 
-Status: in progress
+Status: done
 
-- [ ] Create public GitHub repository `rogerchappel/paperhug`.
-- [ ] Push `main`.
-- [ ] Confirm GitHub Actions status.
-- [ ] Tag `v0.1.0`.
-- [ ] Confirm GitHub Release exists.
+- [x] Create public GitHub repository `rogerchappel/paperhug`.
+- [x] Push `main`.
+- [x] Confirm GitHub Actions status.
+- [x] Tag `v0.1.0`.
+- [x] Confirm GitHub Release exists.
 - [ ] Mark the `oss-ideas` entry as built.
 
 ## Future backlog
