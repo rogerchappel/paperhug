@@ -26,6 +26,7 @@ The first release must be useful without credentials:
 3. **CLI workflows** — quick, occasion aliases, wizard, refine, render, templates list, providers list.
 4. **Renderer/provider safety** — prompt-only default provider, documented provider registry, deterministic A4 PDFs, preview SVG.
 5. **Verification** — unit and CLI smoke tests.
+6. **Publish/release** — public GitHub repository, protected main, `v0.1.0` tag/release, and `oss-ideas` built marker.
 
 ## Release gates
 
@@ -62,3 +63,9 @@ Then open `dist/birthday-for-mum/card.pdf` and, if desired, paste `prompts/image
 - PDF output uses simple Helvetica text and placeholder vector art.
 - `refine` stores terminal revision notes and rerenders; it does not call an LLM yet.
 - `preview.png` from the PRD is currently `preview.svg` to avoid native image dependencies.
+
+## Release result
+
+- Repository: <https://github.com/rogerchappel/paperhug>
+- Release: <https://github.com/rogerchappel/paperhug/releases/tag/v0.1.0>
+- `oss-ideas` built marker: `ideas/built/paperhug/PRD.md`

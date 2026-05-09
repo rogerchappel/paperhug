@@ -68,7 +68,7 @@ Status: done
 - [x] Confirm GitHub Actions status.
 - [x] Tag `v0.1.0`.
 - [x] Confirm GitHub Release exists.
-- [ ] Mark the `oss-ideas` entry as built.
+- [x] Mark the `oss-ideas` entry as built.
 
 ## Future backlog
 
