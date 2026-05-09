@@ -1,0 +1,72 @@
+[
+  {
+    "id": "birthday",
+    "name": "Birthday",
+    "coverTitle": "Happy Birthday",
+    "defaultTone": "warm, celebratory, specific, not generic",
+    "imagePrompt": "Create joyful birthday card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write a birthday card message for {recipient} from {sender}. Tone: {messageBrief}. Keep it printable and sincere."
+  },
+  {
+    "id": "mothers-day",
+    "aliases": ["mother", "mum", "mom", "mothers"],
+    "name": "Mother's Day",
+    "coverTitle": "Happy Mother's Day",
+    "defaultTone": "grateful, warm, a little funny if requested",
+    "imagePrompt": "Create thoughtful Mother's Day card artwork for {recipient}. Use {style}. Include gentle, personal warmth. Mood: {messageBrief}.",
+    "textPrompt": "Write a Mother's Day card message for {recipient} from {sender}. Tone: {messageBrief}. Avoid clichés and keep it heartfelt."
+  },
+  {
+    "id": "fathers-day",
+    "aliases": ["father", "dad", "fathers"],
+    "name": "Father's Day",
+    "coverTitle": "Happy Father's Day",
+    "defaultTone": "warm, understated, grateful",
+    "imagePrompt": "Create Father's Day card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write a Father's Day card message for {recipient} from {sender}. Tone: {messageBrief}. Keep it natural."
+  },
+  {
+    "id": "anniversary",
+    "name": "Anniversary",
+    "coverTitle": "Happy Anniversary",
+    "defaultTone": "romantic, grounded, personal",
+    "imagePrompt": "Create anniversary card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write an anniversary card message for {recipient} from {sender}. Tone: {messageBrief}."
+  },
+  {
+    "id": "thank-you",
+    "aliases": ["thanks", "thankyou"],
+    "name": "Thank You",
+    "coverTitle": "Thank You",
+    "defaultTone": "grateful, specific, kind",
+    "imagePrompt": "Create thank-you card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write a thank-you card message for {recipient} from {sender}. Tone: {messageBrief}."
+  },
+  {
+    "id": "congratulations",
+    "aliases": ["congrats"],
+    "name": "Congratulations",
+    "coverTitle": "Congratulations",
+    "defaultTone": "proud, bright, encouraging",
+    "imagePrompt": "Create congratulations card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write a congratulations card message for {recipient} from {sender}. Tone: {messageBrief}."
+  },
+  {
+    "id": "new-baby",
+    "aliases": ["baby"],
+    "name": "New Baby",
+    "coverTitle": "Welcome Little One",
+    "defaultTone": "gentle, joyful, tender",
+    "imagePrompt": "Create new baby card artwork for {recipient}. Use {style}. Mood: {messageBrief}.",
+    "textPrompt": "Write a new baby card message for {recipient} from {sender}. Tone: {messageBrief}."
+  },
+  {
+    "id": "custom",
+    "aliases": ["freeform"],
+    "name": "Custom",
+    "coverTitle": "For You",
+    "defaultTone": "personal, thoughtful",
+    "imagePrompt": "Create printable greeting card artwork for {recipient}. Use {style}. Occasion notes: {messageBrief}.",
+    "textPrompt": "Write a printable greeting card message for {recipient} from {sender}. Notes: {messageBrief}."
+  }
+]

@@ -1,0 +1,9 @@
+[
+  { "id": "warm-watercolour", "name": "Warm watercolour", "prompt": "warm watercolour illustration, soft paper texture, generous whitespace" },
+  { "id": "kids-crayon", "name": "Kids crayon drawing", "prompt": "charming kids crayon drawing, playful imperfect lines, bright friendly colours" },
+  { "id": "minimal-modern", "name": "Minimal modern", "prompt": "minimal modern greeting card design, refined typography, subtle shapes" },
+  { "id": "vintage-floral", "name": "Vintage floral", "prompt": "vintage floral illustration, botanical details, nostalgic paper tones" },
+  { "id": "cute-animal", "name": "Cute animal mascot", "prompt": "cute animal mascot, wholesome expression, storybook card art" },
+  { "id": "bold-typographic", "name": "Bold typographic", "prompt": "bold typographic greeting card, expressive lettering, clean composition" },
+  { "id": "photo-collage", "name": "Photo-collage inspired", "prompt": "photo-collage inspired composition, layered paper, scrapbook texture" }
+]
