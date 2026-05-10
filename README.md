@@ -30,7 +30,7 @@ dist/birthday-for-mum/
   README.txt
 ```
 
-Print `card.pdf` at 100% scale, trim if needed, and glue the pages to folded cardstock.
+Print with `paperhug print dist/birthday-for-mum/project.json --printer <name>` to force A4 landscape and double-sided short-edge duplex. If printing manually, use A4 landscape at 100% scale and double-sided/short-edge flip, then fold on the centre line.
 
 ## Commands
 
@@ -40,6 +40,7 @@ paperhug birthday --for Mum --message cheerful
 paperhug wizard
 paperhug refine <project.json> --note "less cheesy"
 paperhug render <project.json>
+paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]
 paperhug templates list
 paperhug providers list
 ```
@@ -56,6 +57,11 @@ paperhug providers list
 - `--provider none` — prompt-only mode. This is the default.
 - `--out <dir>` — output base directory.
 - `--force` — replace an existing output folder.
+
+### Printing
+
+`paperhug print` shells out to the system `lp` command and always includes explicit A4 landscape print options. By default it also requests double-sided short-edge duplex, which matches the landscape half-fold card layout. Use `--no-duplex` only when you want to print pages separately. Set `PAPERHUG_PRINTER=<name>` or pass `--printer <name>` to pick a printer.
+
 
 ## Occasions
 
