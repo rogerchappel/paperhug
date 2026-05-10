@@ -36,3 +36,21 @@ test('quick prompt-only mode writes a project and valid PDF', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('print dry-run always uses landscape and duplex short-edge options', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-print-'));
+  try {
+    const pdf = path.join(dir, 'card.pdf');
+    await import('node:fs/promises').then(({ writeFile }) => writeFile(pdf, '%PDF test'));
+    const { stdout } = await execFileAsync(process.execPath, [cli, 'print', pdf, '--printer', 'Test_Printer', '--dry-run']);
+    const parsed = JSON.parse(stdout);
+    assert.equal(parsed.ok, true);
+    assert.equal(parsed.command, 'lp');
+    assert.equal(parsed.landscape, true);
+    assert.equal(parsed.duplex, 'DuplexTumble');
+    assert.deepEqual(parsed.args.slice(0, 10), ['-d', 'Test_Printer', '-o', 'landscape', '-o', 'PageSize=A4', '-o', 'fit-to-page', '-o', 'Duplex=DuplexTumble']);
+    assert.ok(parsed.args.includes('sides=two-sided-short-edge'));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

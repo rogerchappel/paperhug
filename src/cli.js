@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawn } from 'node:child_process';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
@@ -34,6 +35,7 @@ async function main(argv = process.argv.slice(2)) {
   if (command === 'quick') return quick(rest);
   if (command === 'wizard') return wizard(rest);
   if (command === 'render') return render(rest);
+  if (command === 'print') return printCard(rest);
   if (command === 'refine') return refine(rest);
   if (occasionAliases.has(command)) return quick([command, ...rest]);
 
@@ -127,6 +129,52 @@ async function render(args) {
   console.log(JSON.stringify({ ok: true, outputDir, cardPdf: path.join(outputDir, 'card.pdf') }, null, 2));
 }
 
+async function printCard(args) {
+  const parsed = parseArgs(args);
+  const target = parsed._[0];
+  if (!target) throw new Error('print requires <project.json|card.pdf>.');
+
+  const resolvedTarget = path.resolve(target);
+  const pdfPath = resolvedTarget.endsWith('.json') ? path.join(path.dirname(resolvedTarget), 'card.pdf') : resolvedTarget;
+  const printer = parsed.printer || process.env.PAPERHUG_PRINTER;
+  const duplex = parsed.duplex === false || parsed.duplex === 'none'
+    ? null
+    : parsed.duplex === 'long-edge'
+      ? 'DuplexNoTumble'
+      : 'DuplexTumble';
+  const lpArgs = [
+    ...(printer ? ['-d', printer] : []),
+    '-o', 'landscape',
+    '-o', 'PageSize=A4',
+    '-o', 'fit-to-page',
+    ...(duplex ? ['-o', `Duplex=${duplex}`, '-o', 'sides=two-sided-short-edge'] : []),
+    pdfPath
+  ];
+
+  if (parsed['dry-run']) {
+    console.log(JSON.stringify({ ok: true, command: 'lp', args: lpArgs, pdf: pdfPath, printer: printer || null, landscape: true, duplex: duplex || 'none' }, null, 2));
+    return;
+  }
+
+  const result = await runPrintCommand('lp', lpArgs);
+  console.log(JSON.stringify({ ok: true, pdf: pdfPath, printer: printer || 'default', landscape: true, duplex: duplex || 'none', output: result.trim() }, null, 2));
+}
+
+function runPrintCommand(command, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => { stdout += chunk; });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) resolve(stdout);
+      else reject(new Error(stderr.trim() || `${command} exited with code ${code}`));
+    });
+  });
+}
+
 async function refine(args) {
   const parsed = parseArgs(args);
   const projectPath = parsed._[0];
@@ -164,7 +212,7 @@ async function providersCommand(args) {
 }
 
 function help() {
-  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--reference <path>] [--provider none]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs.`);
+  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--reference <path>] [--provider none]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
 }
 
 main().catch((error) => {
