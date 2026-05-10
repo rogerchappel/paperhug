@@ -15,3 +15,4 @@ For a hosted documentation site, see the `docs-site/` directory if present.
 ## Design
 
 - [Capacitor mobile app design](CAPACITOR_MOBILE_APP_DESIGN.md)
+- [App architecture](APP_ARCHITECTURE.md)
