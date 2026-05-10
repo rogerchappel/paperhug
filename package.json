@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "check": "node --check src/cli.js && node --test",
-    "build": "node --check src/cli.js",
+    "build": "node --check src/cli.js && npm run build:web && npm run build:mobile",
     "test": "node --test",
     "smoke": "node src/cli.js quick birthday --for Test --message cheerful --provider none --out tmp/smoke --force",
     "package:smoke": "npm pack --dry-run",
@@ -25,7 +25,8 @@
     "dev:web": "npm --workspace @paperhug/web run dev",
     "build:web": "npm --workspace @paperhug/web run build",
     "preview:web": "npm --workspace @paperhug/web run preview",
-    "build:mobile": "npm --workspace @paperhug/mobile run build"
+    "build:mobile": "npm --workspace @paperhug/mobile run build",
+    "check:apps": "npm run build:web && npm run build:mobile"
   },
   "keywords": [
     "greeting-card",

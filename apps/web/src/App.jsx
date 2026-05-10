@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createCardDraft, occasions, styles } from '@paperhug/app-core';
+import { downloadCardPdf, downloadProjectJson } from './downloads.js';
 import './styles.css';
 
 const toneChips = ['warm', 'funny', 'from the kids', 'less cheesy', 'heartfelt', 'playful'];
@@ -104,7 +105,11 @@ export default function App() {
               <div><dt>Orientation</dt><dd>{draft.printIntent.orientation}</dd></div>
               <div><dt>Duplex</dt><dd>{draft.printIntent.duplex}</dd></div>
             </dl>
-            <button type="button" onClick={() => window.print()}>Preview print flow</button>
+            <div className="action-stack">
+              <button type="button" onClick={() => downloadCardPdf(draft)}>Download card PDF</button>
+              <button type="button" className="secondary" onClick={() => downloadProjectJson(draft)}>Download project JSON</button>
+              <button type="button" className="secondary" onClick={() => window.print()}>Preview browser print</button>
+            </div>
           </div>
         </aside>
       </section>

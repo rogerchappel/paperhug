@@ -243,6 +243,11 @@ dd {
   text-transform: capitalize;
 }
 
+.action-stack {
+  display: grid;
+  gap: 10px;
+}
+
 .print-card button {
   width: 100%;
   border: 0;
@@ -251,6 +256,12 @@ dd {
   color: white;
   padding: 13px 14px;
   font-weight: 900;
+}
+
+.print-card button.secondary {
+  border: 1px solid rgba(255, 248, 241, 0.28);
+  background: transparent;
+  color: #fff8f1;
 }
 
 @media (max-width: 840px) {

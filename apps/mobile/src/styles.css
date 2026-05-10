@@ -182,6 +182,21 @@ button.primary,
   text-align: center;
 }
 
+button.secondary {
+  text-align: center;
+}
+
+.step-summary,
+.status {
+  margin: 0;
+  color: #6b5851;
+  font-weight: 750;
+}
+
+.step-summary {
+  color: #f9efe8;
+}
+
 button:disabled {
   opacity: 0.45;
 }

@@ -4,8 +4,8 @@ Paperhug now has three open-source surfaces that share the same app-safe card mo
 
 - `src/` — the existing CLI and Node PDF pipeline.
 - `packages/app-core/` — browser-safe card draft, prompt, style, and print-intent logic.
-- `apps/web/` — React/Vite web app for local browser use and future PWA hosting.
-- `apps/mobile/` — React/Vite + Capacitor shell for iOS and Android.
+- `apps/web/` — React/Vite web app for local browser use and future PWA hosting, including card PDF and project JSON download.
+- `apps/mobile/` — React/Vite + Capacitor shell for iOS and Android, including native share-sheet PDF handoff when running on device.
 
 ## Why this split
 
@@ -42,9 +42,19 @@ Good first issues can now target independent layers:
 
 Provider integrations must remain optional and consent-based. Tests should pass without API keys or real network access.
 
+## Current end-to-end app flow
+
+The shared app core can now turn a draft into:
+
+- a browser-safe `project.json` export;
+- a two-page A4 landscape PDF;
+- bytes/Blob helpers for web download and native handoff.
+
+The web app downloads the generated PDF or project JSON directly in the browser. The mobile shell writes the PDF to Capacitor cache and opens the native share sheet on iOS/Android; that is the handoff point for AirPrint, Android Print Framework, Files, Messages, or other installed destinations.
+
 ## Next implementation steps
 
 - Move more prompt/template mapping from `src/` into browser-safe shared packages.
 - Add a shared React UI package if web and mobile screens begin duplicating too much.
-- Add PDF preview/export that works inside a mobile WebView.
-- Add native print/share adapters behind an interface rather than calling platform APIs directly from screens.
+- Add richer PDF preview pages and artwork placement once generated image assets are in the app model.
+- Add true native print adapters if the share-sheet handoff is not enough on-device.
