@@ -1,0 +1,14 @@
+{
+  "name": "@paperhug/app-core",
+  "version": "0.1.0",
+  "description": "Browser-safe Paperhug card creation model for web and mobile apps.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "license": "MIT"
+}

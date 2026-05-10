@@ -4,6 +4,26 @@
 
 The default provider is `none`, which means **no network calls, no hidden uploads, and no API keys**. You can use the generated image prompt in Nano Banana/Gemini, OpenAI Images, or another image tool, then rerender the saved project.
 
+
+## App surfaces
+
+Paperhug is growing from a CLI into an app-friendly open-source toolkit:
+
+- `src/` keeps the existing CLI and Node PDF pipeline.
+- `packages/app-core/` contains browser-safe card draft, prompt, style, and print-intent logic.
+- `apps/web/` is a React/Vite web app scaffold for local/PWA use.
+- `apps/mobile/` is a React/Vite + Capacitor shell for iOS and Android.
+
+Run the app shells with:
+
+```bash
+npm run dev:web
+npm run build:web
+npm run build:mobile
+```
+
+See [`docs/APP_ARCHITECTURE.md`](docs/APP_ARCHITECTURE.md) and [`docs/CAPACITOR_MOBILE_APP_DESIGN.md`](docs/CAPACITOR_MOBILE_APP_DESIGN.md) for the web/mobile direction.
+
 ## Quick start
 
 ```bash
