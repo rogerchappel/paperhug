@@ -10,9 +10,9 @@ The default provider is `none`, which means **no network calls, no hidden upload
 Paperhug is growing from a CLI into an app-friendly open-source toolkit:
 
 - `src/` keeps the existing CLI and Node PDF pipeline.
-- `packages/app-core/` contains browser-safe card draft, prompt, style, and print-intent logic.
-- `apps/web/` is a React/Vite web app scaffold for local/PWA use.
-- `apps/mobile/` is a React/Vite + Capacitor shell for iOS and Android.
+- `packages/app-core/` contains browser-safe card draft, prompt, PDF export, style, and print-intent logic.
+- `apps/web/` is a React/Vite web app for local/PWA use with PDF/project downloads.
+- `apps/mobile/` is a React/Vite + Capacitor shell for iOS and Android with native share-sheet PDF handoff.
 
 Run the app shells with:
 

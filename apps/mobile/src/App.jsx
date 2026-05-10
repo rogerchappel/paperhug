@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createCardDraft, occasions, styles } from '@paperhug/app-core';
+import { shareOrDownloadCardPdf } from './shareCard.js';
 import './styles.css';
 
 const steps = ['Occasion', 'Recipient', 'Style', 'Message', 'Preview', 'Print'];
@@ -14,15 +15,27 @@ export default function App() {
     message: ''
   });
   const [step, setStep] = useState(0);
+  const [status, setStatus] = useState('');
   const draft = useMemo(() => createCardDraft(form), [form]);
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  async function handleSharePdf() {
+    setStatus('Preparing your PDF…');
+    try {
+      const result = await shareOrDownloadCardPdf(draft);
+      setStatus(result.mode === 'share' ? 'Opened native share sheet.' : `Downloaded ${result.filename}.`);
+    } catch (error) {
+      setStatus(`Could not prepare PDF: ${error.message}`);
+    }
+  }
 
   return (
     <main className="mobile-shell">
       <header className="mobile-header">
         <p>Paperhug</p>
         <h1>{steps[step]}</h1>
-        <div className="progress" aria-label={`Step ${step + 1} of ${steps.length}`}>
+        <p className="step-summary">Step {step + 1} of {steps.length}: {steps[step]}</p>
+        <div className="progress" aria-label={`Step ${step + 1} of ${steps.length}: ${steps[step]}`}>
           {steps.map((label, index) => <span key={label} className={index <= step ? 'active' : ''} />)}
         </div>
       </header>
@@ -32,7 +45,12 @@ export default function App() {
           <h2>What's the occasion?</h2>
           <div className="choice-grid">
             {occasions.map((occasion) => (
-              <button key={occasion.id} className={form.occasionId === occasion.id ? 'selected' : ''} onClick={() => update('occasionId', occasion.id)}>
+              <button
+                key={occasion.id}
+                className={form.occasionId === occasion.id ? 'selected' : ''}
+                aria-pressed={form.occasionId === occasion.id}
+                onClick={() => update('occasionId', occasion.id)}
+              >
                 {occasion.name}
               </button>
             ))}
@@ -53,7 +71,12 @@ export default function App() {
           <h2>Pick a look</h2>
           <div className="choice-grid">
             {styles.map((style) => (
-              <button key={style.id} className={form.styleId === style.id ? 'selected' : ''} onClick={() => update('styleId', style.id)}>
+              <button
+                key={style.id}
+                className={form.styleId === style.id ? 'selected' : ''}
+                aria-pressed={form.styleId === style.id}
+                onClick={() => update('styleId', style.id)}
+              >
                 {style.name}
               </button>
             ))}
@@ -92,7 +115,9 @@ export default function App() {
             <li>Landscape orientation</li>
             <li>Short-edge double-sided printing</li>
           </ul>
-          <button className="primary" onClick={() => window.print()}>Open print preview</button>
+          <button className="primary" onClick={handleSharePdf}>Share / print PDF</button>
+          <button className="secondary" onClick={() => window.print()}>Browser print preview</button>
+          {status && <p className="status" role="status">{status}</p>}
         </section>
       )}
 
