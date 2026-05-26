@@ -3,6 +3,19 @@ import path from 'node:path';
 
 const A4 = { width: 595.28, height: 841.89 };
 const A4_LANDSCAPE = { width: 841.89, height: 595.28 };
+const PDF_FONTS = [
+  ['F1', 'Helvetica'],
+  ['F2', 'Times-Roman'],
+  ['F3', 'Times-Italic'],
+  ['F4', 'Helvetica-Bold'],
+  ['F5', 'Courier-Oblique']
+];
+const INSIDE_STYLES = {
+  'classic-serif': { bodyFont: 'F3', bodySize: 17, leading: 25, max: 36, widthFactor: 0.46 },
+  'modern-sans': { bodyFont: 'F1', bodySize: 16, leading: 24, max: 38, widthFactor: 0.48 },
+  'typewriter': { bodyFont: 'F5', bodySize: 14, leading: 22, max: 40, widthFactor: 0.60 },
+  script: { bodyFont: 'F3', bodySize: 18, leading: 27, max: 34, widthFactor: 0.46 }
+};
 
 function escapePdfText(value) {
   return String(value).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
@@ -44,19 +57,33 @@ function pageContent(lines, page = A4) {
   return commands.join('\n');
 }
 
-function drawText({ text, x, y, size = 14, max = 68, leading = Math.round(size * 1.45) }) {
+function drawText({ text, x, y, size = 14, max = 68, leading = Math.round(size * 1.45), font = 'F1' }) {
   const commands = [];
   let cursorY = y;
   for (const line of wrapText(text, max)) {
-    commands.push(`BT /F1 ${size} Tf ${x} ${cursorY} Td (${escapePdfText(line)}) Tj ET`);
+    commands.push(`BT /${font} ${size} Tf ${x} ${cursorY} Td (${escapePdfText(line)}) Tj ET`);
     cursorY -= leading;
   }
   return commands.join('\n');
 }
 
+function estimateTextWidth(text, size, widthFactor = 0.5) {
+  return String(text || '').length * size * widthFactor;
+}
+
+function drawCenteredLine({ text, centerX, y, size, font, widthFactor }) {
+  const x = centerX - (estimateTextWidth(text, size, widthFactor) / 2);
+  return `BT /${font} ${size} Tf ${x} ${y} Td (${escapePdfText(text)}) Tj ET`;
+}
+
+function insideStyleFor(project) {
+  return INSIDE_STYLES[project.insideStyle] || INSIDE_STYLES['classic-serif'];
+}
+
 function landscapeOutsideContent(project, hasArtwork) {
   const half = A4_LANDSCAPE.width / 2;
   const artBox = { x: half + 56, y: 56, width: half - 112, height: A4_LANDSCAPE.height - 112 };
+  const hasCoverTitle = Boolean(project.coverTitle);
   const commands = [
     'q',
     `1 1 1 rg 0 0 ${A4_LANDSCAPE.width} ${A4_LANDSCAPE.height} re f`,
@@ -71,8 +98,8 @@ function landscapeOutsideContent(project, hasArtwork) {
     '0.93 0.87 0.78 RG 1 w',
     `${half + 48} 48 ${half - 96} ${A4_LANDSCAPE.height - 96} re S`,
     '0.24 0.19 0.16 rg',
-    drawText({ text: 'Made with love', x: 82, y: 318, size: 18, max: 28 }),
-    drawText({ text: `by ${project.sender}`, x: 82, y: 286, size: 16, max: 28 })
+    drawCenteredLine({ text: 'Made with love', centerX: half / 2, y: 86, size: 10, font: 'F2', widthFactor: 0.46 }),
+    drawCenteredLine({ text: project.sender, centerX: half / 2, y: 68, size: 8.5, font: 'F2', widthFactor: 0.46 })
   ];
 
   if (hasArtwork) {
@@ -80,12 +107,16 @@ function landscapeOutsideContent(project, hasArtwork) {
       'q',
       `${artBox.x} ${artBox.y} ${artBox.width} ${artBox.height} re W n`,
       `${artBox.width} 0 0 ${artBox.height} ${artBox.x} ${artBox.y} cm /Im1 Do`,
-      'Q',
+      'Q'
+    );
+    if (hasCoverTitle) {
+      commands.push(
       '1 1 1 rg',
       `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re f`,
       '0.68 0.54 0.35 RG 1.25 w',
       `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re S`
-    );
+      );
+    }
   } else {
     commands.push(
       '1 1 1 rg',
@@ -103,16 +134,29 @@ function landscapeOutsideContent(project, hasArtwork) {
     );
   }
 
-  commands.push(
-    '0.12 0.10 0.10 rg',
-    drawText({ text: project.coverTitle || 'For You', x: artBox.x + 44, y: A4_LANDSCAPE.height - 106, size: 24, max: 24, leading: 28 }),
-    'Q'
-  );
+  if (hasCoverTitle) {
+    commands.push(
+      '0.12 0.10 0.10 rg',
+      drawText({ text: project.coverTitle, x: artBox.x + 44, y: A4_LANDSCAPE.height - 106, size: 24, max: 24, leading: 28 }),
+      'Q'
+    );
+  } else {
+    commands.push('Q');
+  }
   return commands.join('\n');
 }
 
 function landscapeInsideContent(project) {
   const half = A4_LANDSCAPE.width / 2;
+  const style = insideStyleFor(project);
+  const messageLines = wrapText(project.message, style.max);
+  const bodySize = messageLines.length > 9 ? Math.max(15, style.bodySize - 3) : style.bodySize;
+  const leading = messageLines.length > 9 ? Math.max(23, style.leading - 5) : style.leading;
+  const centerX = half + (half / 2);
+  const safeTop = A4_LANDSCAPE.height - 150;
+  const safeBottom = 108;
+  const blockHeight = ((messageLines.length - 1) * leading) + bodySize;
+  let y = safeBottom + ((safeTop - safeBottom + blockHeight) / 2) - bodySize;
   const commands = [
     'q',
     `1 1 1 rg 0 0 ${A4_LANDSCAPE.width} ${A4_LANDSCAPE.height} re f`,
@@ -126,15 +170,16 @@ function landscapeInsideContent(project) {
     `${half + 36} 36 ${half - 72} ${A4_LANDSCAPE.height - 72} re S`,
     '0.93 0.87 0.78 RG 1 w',
     `${half + 48} 48 ${half - 96} ${A4_LANDSCAPE.height - 96} re S`,
-    '0.28 0.22 0.18 rg',
-    drawText({ text: `For ${project.recipient}`, x: 82, y: 322, size: 20, max: 28 }),
-    drawText({ text: `from ${project.sender}`, x: 82, y: 288, size: 16, max: 28 })
+    '0.28 0.22 0.18 rg'
   ];
 
-  let y = 392;
-  for (const line of wrapText(project.message, 34)) {
-    commands.push(`BT /F1 21 Tf ${half + 75} ${y} Td (${escapePdfText(line)}) Tj ET`);
-    y -= 34;
+  for (const line of messageLines) {
+    if (line.trim()) {
+      commands.push(drawCenteredLine({ text: line, centerX, y, size: bodySize, font: style.bodyFont, widthFactor: style.widthFactor }));
+      y -= leading;
+    } else {
+      y -= leading * 0.72;
+    }
   }
 
   commands.push('Q');
@@ -150,7 +195,10 @@ export function createPdf(pages, page = A4) {
 
   const catalogId = add('');
   const pagesId = add('');
-  const fontId = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  const fontIds = Object.fromEntries(PDF_FONTS.map(([name, baseFont]) => [
+    name,
+    add(`<< /Type /Font /Subtype /Type1 /BaseFont /${baseFont} >>`)
+  ]));
   const pageIds = [];
 
   for (const rawPage of pages) {
@@ -168,7 +216,8 @@ export function createPdf(pages, page = A4) {
     const xobjectResources = xobjects.length
       ? ` /XObject << ${xobjects.map((image) => `/${image.name} ${image.id} 0 R`).join(' ')} >>`
       : '';
-    const pageId = add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${page.width} ${page.height}] /Resources << /Font << /F1 ${fontId} 0 R >>${xobjectResources} >> /Contents ${contentId} 0 R >>`);
+    const fontResources = Object.entries(fontIds).map(([name, id]) => `/${name} ${id} 0 R`).join(' ');
+    const pageId = add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${page.width} ${page.height}] /Resources << /Font << ${fontResources} >>${xobjectResources} >> /Contents ${contentId} 0 R >>`);
     pageIds.push(pageId);
   }
 
@@ -257,7 +306,12 @@ function createPlaceholderSvg(project) {
   const title = escapeXml(project.coverTitle || 'For You');
   const subtitle = escapeXml(`${project.occasion.name} for ${project.recipient}`);
   const style = escapeXml(project.style.name);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1754" height="1240" viewBox="0 0 1754 1240" role="img" aria-label="paperhug preview">\n  <rect width="1754" height="1240" fill="#ffffff"/>\n  <line x1="877" y1="0" x2="877" y2="1240" stroke="#b8a085" stroke-width="4"/>\n  <rect x="90" y="90" width="697" height="1060" fill="#ffffff" stroke="#d2b58f" stroke-width="8"/>\n  <rect x="116" y="116" width="645" height="1008" fill="none" stroke="#eee1cf" stroke-width="3"/>\n  <rect x="967" y="90" width="697" height="1060" fill="#ffffff" stroke="#d2b58f" stroke-width="8"/>\n  <rect x="993" y="116" width="645" height="1008" fill="none" stroke="#eee1cf" stroke-width="3"/>\n  <circle cx="1080" cy="330" r="70" fill="#ffd3c2"/>\n  <circle cx="1550" cy="980" r="110" fill="#d8f3dc"/>\n  <path d="M1050 960 C1170 820 1320 1120 1460 950 S1620 920 1630 1060" fill="none" stroke="#b7b7ff" stroke-width="18" stroke-linecap="round"/>\n  <text x="1315" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="72" fill="#2f2a2a">${title}</text>\n  <text x="1315" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#5f5a5a">${subtitle}</text>\n  <text x="1315" y="705" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#837b7b">${style}</text>\n  <text x="1315" y="1110" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#9b8f8f">prompt-only placeholder • use an image provider for generated artwork</text>\n</svg>\n`;
+  const titleLine = project.coverTitle
+    ? `  <text x="1315" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="72" fill="#2f2a2a">${title}</text>\n`
+    : '';
+  const subtitleY = project.coverTitle ? 640 : 590;
+  const styleY = project.coverTitle ? 705 : 655;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1754" height="1240" viewBox="0 0 1754 1240" role="img" aria-label="paperhug preview">\n  <rect width="1754" height="1240" fill="#ffffff"/>\n  <line x1="877" y1="0" x2="877" y2="1240" stroke="#b8a085" stroke-width="4"/>\n  <rect x="90" y="90" width="697" height="1060" fill="#ffffff" stroke="#d2b58f" stroke-width="8"/>\n  <rect x="116" y="116" width="645" height="1008" fill="none" stroke="#eee1cf" stroke-width="3"/>\n  <rect x="967" y="90" width="697" height="1060" fill="#ffffff" stroke="#d2b58f" stroke-width="8"/>\n  <rect x="993" y="116" width="645" height="1008" fill="none" stroke="#eee1cf" stroke-width="3"/>\n  <circle cx="1080" cy="330" r="70" fill="#ffd3c2"/>\n  <circle cx="1550" cy="980" r="110" fill="#d8f3dc"/>\n  <path d="M1050 960 C1170 820 1320 1120 1460 950 S1620 920 1630 1060" fill="none" stroke="#b7b7ff" stroke-width="18" stroke-linecap="round"/>\n${titleLine}  <text x="1315" y="${subtitleY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#5f5a5a">${subtitle}</text>\n  <text x="1315" y="${styleY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#837b7b">${style}</text>\n  <text x="1315" y="1110" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#9b8f8f">prompt-only placeholder • use an image provider for generated artwork</text>\n</svg>\n`;
 }
 
 function escapeXml(value) {

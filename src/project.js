@@ -2,8 +2,9 @@ import { mkdir, readFile, writeFile, copyFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { slugify } from './templates.js';
 
-export function createProject({ occasion, style, recipient, sender, messageBrief, provider, model, references, prompts, message, coverTitle }) {
+export function createProject({ occasion, style, recipient, sender, messageBrief, provider, model, references, prompts, message, coverTitle, insideStyle }) {
   const now = new Date().toISOString();
+  const resolvedCoverTitle = coverTitle === false ? '' : coverTitle || occasion.coverTitle;
   return {
     version: '0.1.0',
     createdAt: now,
@@ -15,7 +16,8 @@ export function createProject({ occasion, style, recipient, sender, messageBrief
     layout: { id: 'a4-landscape-fold-half', page: 'A4 landscape', workflow: 'print two landscape A4 pages duplex, flip on short edge if available, then fold on the centre line' },
     provider: { id: provider || 'none', model: model || null },
     references,
-    coverTitle: coverTitle || occasion.coverTitle,
+    coverTitle: resolvedCoverTitle,
+    insideStyle: insideStyle || 'classic-serif',
     messageBrief,
     prompts,
     message,
