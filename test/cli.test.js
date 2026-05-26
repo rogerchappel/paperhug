@@ -37,6 +37,41 @@ test('quick prompt-only mode writes a project and valid PDF', async () => {
   }
 });
 
+test('quick accepts card ideas, inside styles, and title-free covers', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-idea-'));
+  try {
+    const out = path.join(dir, 'card');
+    const { stdout } = await execFileAsync(process.execPath, [
+      cli,
+      'quick',
+      'custom',
+      '--for',
+      'Mum and Dad',
+      '--from',
+      'Roger, Sarah, Arthur and Henry',
+      '--idea',
+      'alpine mountains, escaping to a new cabin together',
+      '--inside-style',
+      'script',
+      '--no-cover-title',
+      '--provider',
+      'none',
+      '--out',
+      out
+    ]);
+    const parsed = JSON.parse(stdout);
+    assert.equal(parsed.ok, true);
+    const project = JSON.parse(await readFile(path.join(out, 'custom-for-mum-and-dad', 'project.json'), 'utf8'));
+    assert.equal(project.coverTitle, '');
+    assert.equal(project.insideStyle, 'script');
+    assert.match(project.messageBrief, /new cabin/);
+    assert.match(project.message, /fresh mountain air/);
+    assert.match(project.prompts.imagePrompt, /Do not include readable cover text/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('print dry-run always uses landscape and duplex short-edge options', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-print-'));
   try {
