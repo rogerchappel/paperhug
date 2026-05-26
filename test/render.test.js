@@ -26,6 +26,9 @@ test('renders a two-page A4 card PDF and prompt artifacts', async () => {
     const pdf = await readFile(path.join(dir, 'card.pdf'), 'utf8');
     assert.match(pdf, /^%PDF-1\.4/);
     assert.match(pdf, /\/Count 2/);
+    assert.match(pdf, /\/MediaBox \[0 0 841\.89 595\.28\]/);
+    assert.doesNotMatch(pdf, /Artwork prompt:/);
+    assert.equal(project.layout.id, 'a4-landscape-fold-half');
     assert.equal(project.outputs.cardPdf, 'card.pdf');
     assert.match(await readFile(path.join(dir, 'prompts', 'image-prompt.txt'), 'utf8'), /Mother/);
   } finally {

@@ -12,7 +12,7 @@ export function createProject({ occasion, style, recipient, sender, messageBrief
     recipient,
     sender,
     style: { id: style.id, name: style.name, prompt: style.prompt },
-    layout: { id: 'a4-glue-front-back', page: 'A4 portrait', workflow: 'print front and back pages, trim, glue to cardstock' },
+    layout: { id: 'a4-landscape-fold-half', page: 'A4 landscape', workflow: 'print two landscape A4 pages duplex, flip on short edge if available, then fold on the centre line' },
     provider: { id: provider || 'none', model: model || null },
     references,
     coverTitle: coverTitle || occasion.coverTitle,
