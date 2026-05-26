@@ -74,7 +74,9 @@ async function quick(args) {
   if (!recipient) throw new Error('quick requires --for <recipient>.');
 
   const sender = parsed.from || 'Me';
-  const messageBrief = parsed.message || parsed.tone || 'warm and personal';
+  const messageBrief = buildMessageBrief(parsed);
+  const coverTitle = parsed['cover-title'] === false || parsed.title === 'none' ? false : parsed.title;
+  const insideStyle = parsed['inside-style'] || parsed.font || 'classic-serif';
   const occasion = await findOccasion(occasionId);
   const style = await findStyle(parsed.style || 'warm-watercolour');
   const provider = findProvider(parsed.provider || 'none');
@@ -84,9 +86,9 @@ async function quick(args) {
   await mkdir(outputDir, { recursive: true });
 
   const references = await prepareReferences(parsed.reference || [], outputDir, parsed['copy-references'] !== false);
-  const prompts = buildPrompts({ occasion, style, recipient, sender, messageBrief, references, coverTitle: parsed.title });
+  const prompts = buildPrompts({ occasion, style, recipient, sender, messageBrief, references, coverTitle });
   const message = parsed.text || defaultMessage({ occasion, recipient, sender, messageBrief });
-  const project = createProject({ occasion, style, recipient, sender, messageBrief, provider: provider.id, model: parsed.model, references, prompts, message, coverTitle: parsed.title });
+  const project = createProject({ occasion, style, recipient, sender, messageBrief, provider: provider.id, model: parsed.model, references, prompts, message, coverTitle, insideStyle });
 
   await generateArtwork({ provider, project, outputDir, model: parsed['image-model'] || parsed.model });
   await renderProject(project, outputDir);
@@ -105,6 +107,13 @@ async function quick(args) {
         ? 'OpenAI generated front-cover artwork and embedded it into the printable PDF.'
         : 'Provider generation completed.'
   }, null, 2));
+}
+
+function buildMessageBrief(parsed) {
+  if (parsed.idea && parsed.message && parsed.idea !== parsed.message) {
+    return `Idea: ${parsed.idea}. Tone: ${parsed.message}`;
+  }
+  return parsed.idea || parsed.message || parsed.tone || 'warm and personal';
 }
 
 async function wizard(args) {
@@ -216,7 +225,7 @@ async function providersCommand(args) {
 }
 
 function help() {
-  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--reference <path>] [--provider none|openai]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs. Use --provider openai with OPENAI_API_KEY for generated front-cover artwork embedded in the printable PDF.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
+  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--idea <story>] [--inside-style classic-serif|modern-sans|typewriter|script] [--reference <path>] [--provider none|openai]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs. Use --provider openai with OPENAI_API_KEY for generated front-cover artwork embedded in the printable PDF. Use --no-cover-title when the generated artwork should carry any stylized text itself.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
 }
 
 main().catch((error) => {
