@@ -73,6 +73,7 @@ test('renders title-free covers and styled inside fonts', async () => {
     const preview = await readFile(path.join(dir, 'preview.svg'), 'utf8');
     assert.match(pdf, /\/BaseFont \/Courier-Oblique/);
     assert.doesNotMatch(pdf, /For You/);
+    assert.doesNotMatch(pdf, /from Roger/);
     assert.doesNotMatch(preview, /For You/);
   } finally {
     await rm(dir, { recursive: true, force: true });

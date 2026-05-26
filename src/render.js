@@ -11,10 +11,10 @@ const PDF_FONTS = [
   ['F5', 'Courier-Oblique']
 ];
 const INSIDE_STYLES = {
-  'classic-serif': { bodyFont: 'F3', detailFont: 'F2', bodySize: 20, leading: 31, max: 34 },
-  'modern-sans': { bodyFont: 'F1', detailFont: 'F4', bodySize: 19, leading: 29, max: 36 },
-  'typewriter': { bodyFont: 'F5', detailFont: 'F5', bodySize: 17, leading: 26, max: 38 },
-  script: { bodyFont: 'F3', detailFont: 'F3', bodySize: 21, leading: 33, max: 32 }
+  'classic-serif': { bodyFont: 'F3', bodySize: 17, leading: 25, max: 36, widthFactor: 0.46 },
+  'modern-sans': { bodyFont: 'F1', bodySize: 16, leading: 24, max: 38, widthFactor: 0.48 },
+  'typewriter': { bodyFont: 'F5', bodySize: 14, leading: 22, max: 40, widthFactor: 0.60 },
+  script: { bodyFont: 'F3', bodySize: 18, leading: 27, max: 34, widthFactor: 0.46 }
 };
 
 function escapePdfText(value) {
@@ -67,6 +67,15 @@ function drawText({ text, x, y, size = 14, max = 68, leading = Math.round(size *
   return commands.join('\n');
 }
 
+function estimateTextWidth(text, size, widthFactor = 0.5) {
+  return String(text || '').length * size * widthFactor;
+}
+
+function drawCenteredLine({ text, centerX, y, size, font, widthFactor }) {
+  const x = centerX - (estimateTextWidth(text, size, widthFactor) / 2);
+  return `BT /${font} ${size} Tf ${x} ${y} Td (${escapePdfText(text)}) Tj ET`;
+}
+
 function insideStyleFor(project) {
   return INSIDE_STYLES[project.insideStyle] || INSIDE_STYLES['classic-serif'];
 }
@@ -89,8 +98,8 @@ function landscapeOutsideContent(project, hasArtwork) {
     '0.93 0.87 0.78 RG 1 w',
     `${half + 48} 48 ${half - 96} ${A4_LANDSCAPE.height - 96} re S`,
     '0.24 0.19 0.16 rg',
-    drawText({ text: 'Made with love', x: 82, y: 318, size: 18, max: 28 }),
-    drawText({ text: `by ${project.sender}`, x: 82, y: 286, size: 16, max: 28 })
+    drawCenteredLine({ text: 'Made with love', centerX: half / 2, y: 86, size: 10, font: 'F2', widthFactor: 0.46 }),
+    drawCenteredLine({ text: project.sender, centerX: half / 2, y: 68, size: 8.5, font: 'F2', widthFactor: 0.46 })
   ];
 
   if (hasArtwork) {
@@ -143,6 +152,11 @@ function landscapeInsideContent(project) {
   const messageLines = wrapText(project.message, style.max);
   const bodySize = messageLines.length > 9 ? Math.max(15, style.bodySize - 3) : style.bodySize;
   const leading = messageLines.length > 9 ? Math.max(23, style.leading - 5) : style.leading;
+  const centerX = half + (half / 2);
+  const safeTop = A4_LANDSCAPE.height - 150;
+  const safeBottom = 108;
+  const blockHeight = ((messageLines.length - 1) * leading) + bodySize;
+  let y = safeBottom + ((safeTop - safeBottom + blockHeight) / 2) - bodySize;
   const commands = [
     'q',
     `1 1 1 rg 0 0 ${A4_LANDSCAPE.width} ${A4_LANDSCAPE.height} re f`,
@@ -156,15 +170,16 @@ function landscapeInsideContent(project) {
     `${half + 36} 36 ${half - 72} ${A4_LANDSCAPE.height - 72} re S`,
     '0.93 0.87 0.78 RG 1 w',
     `${half + 48} 48 ${half - 96} ${A4_LANDSCAPE.height - 96} re S`,
-    '0.28 0.22 0.18 rg',
-    drawText({ text: `For ${project.recipient}`, x: 82, y: 322, size: 20, max: 28, font: style.detailFont }),
-    drawText({ text: `from ${project.sender}`, x: 82, y: 288, size: 16, max: 28, font: style.detailFont })
+    '0.28 0.22 0.18 rg'
   ];
 
-  let y = 392;
   for (const line of messageLines) {
-    commands.push(`BT /${style.bodyFont} ${bodySize} Tf ${half + 75} ${y} Td (${escapePdfText(line)}) Tj ET`);
-    y -= leading;
+    if (line.trim()) {
+      commands.push(drawCenteredLine({ text: line, centerX, y, size: bodySize, font: style.bodyFont, widthFactor: style.widthFactor }));
+      y -= leading;
+    } else {
+      y -= leading * 0.72;
+    }
   }
 
   commands.push('Q');
