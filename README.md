@@ -2,7 +2,7 @@
 
 `paperhug` is a CLI-first kit for making print-at-home greeting cards. It turns an occasion, recipient, style, message brief, and optional reference images into a self-contained card folder with prompts, project JSON, preview art, and A4 PDFs.
 
-The default provider is `none`, which means **no network calls, no hidden uploads, and no API keys**. You can use the generated image prompt in Nano Banana/Gemini, OpenAI Images, or another image tool, then rerender the saved project.
+The default provider is `none`, which means **no network calls, no hidden uploads, and no API keys**. For generated cover artwork, set `OPENAI_API_KEY` and use `--provider openai`; paperhug saves the image into the project and embeds it in the printable foldable PDF.
 
 
 ## App surfaces
@@ -75,6 +75,8 @@ paperhug providers list
 - `--title <title>` — cover title override.
 - `--reference <path>` — repeatable local reference image path.
 - `--provider none` — prompt-only mode. This is the default.
+- `--provider openai` — generate front-cover artwork with OpenAI Images and embed it into the printable PDF.
+- `--model <model>` — override the selected provider model, for example `gpt-image-1.5`.
 - `--out <dir>` — output base directory.
 - `--force` — replace an existing output folder.
 
@@ -98,11 +100,23 @@ Built-in occasion templates:
 
 ## Providers
 
-`paperhug` has a provider registry but v0.1.0 intentionally ships only prompt-only generation:
+`paperhug` has a provider registry with a CI-safe offline default and optional API-backed artwork generation:
 
 - `none` — ready now, CI-safe, no network calls.
+- `openai` — uses `OPENAI_API_KEY` to generate front-cover artwork with OpenAI Images. Default model: `gpt-image-1.5`. The generated JPEG is saved as `assets/front.jpg` and embedded into `card.pdf`.
 - `nano-banana` — documented placeholder for Gemini-style image generation with references.
-- `openai` — documented placeholder for OpenAI image generation.
+
+Image-generation example:
+
+```bash
+OPENAI_API_KEY=... paperhug birthday \
+  --for "Mum" \
+  --from "Roger" \
+  --style "warm watercolour Australian native flowers" \
+  --message "funny, grateful, not cheesy" \
+  --provider openai \
+  --force
+```
 
 Run:
 

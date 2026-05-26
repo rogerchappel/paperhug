@@ -88,7 +88,7 @@ async function quick(args) {
   const message = parsed.text || defaultMessage({ occasion, recipient, sender, messageBrief });
   const project = createProject({ occasion, style, recipient, sender, messageBrief, provider: provider.id, model: parsed.model, references, prompts, message, coverTitle: parsed.title });
 
-  await generateArtwork({ provider, project });
+  await generateArtwork({ provider, project, outputDir, model: parsed['image-model'] || parsed.model });
   await renderProject(project, outputDir);
   await saveProject(path.join(outputDir, 'project.json'), project);
 
@@ -99,7 +99,11 @@ async function quick(args) {
     cardPdf: path.join(outputDir, 'card.pdf'),
     preview: path.join(outputDir, 'preview.svg'),
     provider: provider.id,
-    note: provider.id === 'none' ? 'Prompt-only mode: no network calls or image uploads were made.' : 'Provider generation completed.'
+    note: provider.id === 'none'
+      ? 'Prompt-only mode: no network calls or image uploads were made.'
+      : provider.id === 'openai'
+        ? 'OpenAI generated front-cover artwork and embedded it into the printable PDF.'
+        : 'Provider generation completed.'
   }, null, 2));
 }
 
@@ -212,7 +216,7 @@ async function providersCommand(args) {
 }
 
 function help() {
-  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--reference <path>] [--provider none]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
+  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--reference <path>] [--provider none|openai]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]\n  paperhug templates list\n  paperhug providers list\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs. Use --provider openai with OPENAI_API_KEY for generated front-cover artwork embedded in the printable PDF.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
 }
 
 main().catch((error) => {
