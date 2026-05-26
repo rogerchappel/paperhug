@@ -11,10 +11,10 @@ const PDF_FONTS = [
   ['F5', 'Courier-Oblique']
 ];
 const INSIDE_STYLES = {
-  'classic-serif': { bodyFont: 'F3', bodySize: 17, leading: 25, max: 36, widthFactor: 0.46 },
-  'modern-sans': { bodyFont: 'F1', bodySize: 16, leading: 24, max: 38, widthFactor: 0.48 },
-  'typewriter': { bodyFont: 'F5', bodySize: 14, leading: 22, max: 40, widthFactor: 0.60 },
-  script: { bodyFont: 'F3', bodySize: 18, leading: 27, max: 34, widthFactor: 0.46 }
+  'classic-serif': { bodyFont: 'F3', bodySize: 15, leading: 23, max: 38 },
+  'modern-sans': { bodyFont: 'F1', bodySize: 14.5, leading: 22, max: 40 },
+  'typewriter': { bodyFont: 'F5', bodySize: 12.5, leading: 20, max: 42 },
+  script: { bodyFont: 'F3', bodySize: 15.5, leading: 23, max: 38 }
 };
 
 function escapePdfText(value) {
@@ -67,12 +67,22 @@ function drawText({ text, x, y, size = 14, max = 68, leading = Math.round(size *
   return commands.join('\n');
 }
 
-function estimateTextWidth(text, size, widthFactor = 0.5) {
-  return String(text || '').length * size * widthFactor;
+function estimateTextWidth(text, size, font = 'F1') {
+  let units = 0;
+  for (const char of String(text || '')) {
+    if (char === ' ') units += 0.25;
+    else if (".,:;!|'".includes(char)) units += 0.22;
+    else if ('ilI[]()'.includes(char)) units += 0.25;
+    else if ('rtfj'.includes(char)) units += 0.34;
+    else if ('mwMW@&'.includes(char)) units += 0.78;
+    else if (/[A-Z]/.test(char)) units += 0.58;
+    else units += font === 'F5' ? 0.60 : 0.46;
+  }
+  return units * size;
 }
 
-function drawCenteredLine({ text, centerX, y, size, font, widthFactor }) {
-  const x = centerX - (estimateTextWidth(text, size, widthFactor) / 2);
+function drawCenteredLine({ text, centerX, y, size, font }) {
+  const x = centerX - (estimateTextWidth(text, size, font) / 2);
   return `BT /${font} ${size} Tf ${x} ${y} Td (${escapePdfText(text)}) Tj ET`;
 }
 
@@ -80,10 +90,27 @@ function insideStyleFor(project) {
   return INSIDE_STYLES[project.insideStyle] || INSIDE_STYLES['classic-serif'];
 }
 
+function artworkFadeFrame({ x, y, width, height }) {
+  const steps = [
+    { inset: 0, stroke: 22 },
+    { inset: 13, stroke: 15 },
+    { inset: 24, stroke: 9 },
+    { inset: 33, stroke: 5 }
+  ];
+  return [
+    '1 1 1 RG',
+    ...steps.flatMap((step) => [
+      `${step.stroke} w`,
+      `${x + step.inset} ${y + step.inset} ${width - (step.inset * 2)} ${height - (step.inset * 2)} re S`
+    ])
+  ];
+}
+
 function landscapeOutsideContent(project, hasArtwork) {
   const half = A4_LANDSCAPE.width / 2;
   const artBox = { x: half + 56, y: 56, width: half - 112, height: A4_LANDSCAPE.height - 112 };
   const hasCoverTitle = Boolean(project.coverTitle);
+  const shouldOverlayCoverTitle = hasCoverTitle && !hasArtwork;
   const commands = [
     'q',
     `1 1 1 rg 0 0 ${A4_LANDSCAPE.width} ${A4_LANDSCAPE.height} re f`,
@@ -98,8 +125,8 @@ function landscapeOutsideContent(project, hasArtwork) {
     '0.93 0.87 0.78 RG 1 w',
     `${half + 48} 48 ${half - 96} ${A4_LANDSCAPE.height - 96} re S`,
     '0.24 0.19 0.16 rg',
-    drawCenteredLine({ text: 'Made with love', centerX: half / 2, y: 86, size: 10, font: 'F2', widthFactor: 0.46 }),
-    drawCenteredLine({ text: project.sender, centerX: half / 2, y: 68, size: 8.5, font: 'F2', widthFactor: 0.46 })
+    drawCenteredLine({ text: 'Made with love', centerX: half / 2, y: 86, size: 10, font: 'F2' }),
+    drawCenteredLine({ text: project.sender, centerX: half / 2, y: 68, size: 8.5, font: 'F2' })
   ];
 
   if (hasArtwork) {
@@ -107,14 +134,15 @@ function landscapeOutsideContent(project, hasArtwork) {
       'q',
       `${artBox.x} ${artBox.y} ${artBox.width} ${artBox.height} re W n`,
       `${artBox.width} 0 0 ${artBox.height} ${artBox.x} ${artBox.y} cm /Im1 Do`,
-      'Q'
+      'Q',
+      ...artworkFadeFrame(artBox)
     );
-    if (hasCoverTitle) {
+    if (shouldOverlayCoverTitle) {
       commands.push(
-      '1 1 1 rg',
-      `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re f`,
-      '0.68 0.54 0.35 RG 1.25 w',
-      `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re S`
+        '1 1 1 rg',
+        `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re f`,
+        '0.68 0.54 0.35 RG 1.25 w',
+        `${artBox.x + 24} ${A4_LANDSCAPE.height - 152} ${artBox.width - 48} 74 re S`
       );
     }
   } else {
@@ -134,7 +162,7 @@ function landscapeOutsideContent(project, hasArtwork) {
     );
   }
 
-  if (hasCoverTitle) {
+  if (shouldOverlayCoverTitle) {
     commands.push(
       '0.12 0.10 0.10 rg',
       drawText({ text: project.coverTitle, x: artBox.x + 44, y: A4_LANDSCAPE.height - 106, size: 24, max: 24, leading: 28 }),
@@ -175,7 +203,7 @@ function landscapeInsideContent(project) {
 
   for (const line of messageLines) {
     if (line.trim()) {
-      commands.push(drawCenteredLine({ text: line, centerX, y, size: bodySize, font: style.bodyFont, widthFactor: style.widthFactor }));
+      commands.push(drawCenteredLine({ text: line, centerX, y, size: bodySize, font: style.bodyFont }));
       y -= leading;
     } else {
       y -= leading * 0.72;
