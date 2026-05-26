@@ -71,8 +71,11 @@ paperhug providers list
 - `--from <name>` — sender label. Defaults to `Me`.
 - `--style <style>` — built-in style ID or freeform art direction.
 - `--message <brief>` — tone/content brief.
+- `--idea <story>` — freeform concept for the artwork prompt and inside message.
 - `--text <message>` — exact printable message.
 - `--title <title>` — cover title override.
+- `--no-cover-title` — leave readable cover text out of prompts and PDF overlays.
+- `--inside-style <style>` — inside typography treatment: `classic-serif`, `modern-sans`, `typewriter`, or `script`.
 - `--reference <path>` — repeatable local reference image path.
 - `--provider none` — prompt-only mode. This is the default.
 - `--provider openai` — generate front-cover artwork with OpenAI Images and embed it into the printable PDF.
@@ -116,6 +119,18 @@ OPENAI_API_KEY=... paperhug birthday \
   --message "funny, grateful, not cheesy" \
   --provider openai \
   --force
+```
+
+Idea-driven inside-message example:
+
+```bash
+paperhug custom \
+  --for "Mum and Dad" \
+  --from "Roger, Sarah, Arthur and Henry" \
+  --style "classic alpine storybook illustration, mountain meadow, warm family adventure" \
+  --idea "Mum and Dad escaping through the mountains to their new cabin" \
+  --inside-style script \
+  --no-cover-title
 ```
 
 Run:
