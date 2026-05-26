@@ -35,3 +35,46 @@ test('renders a two-page A4 card PDF and prompt artifacts', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('renders title-free covers and styled inside fonts', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-title-free-'));
+  try {
+    const occasion = await findOccasion('custom');
+    const style = await findStyle('warm-watercolour');
+    const prompts = buildPrompts({
+      occasion,
+      style,
+      recipient: 'Mum and Dad',
+      sender: 'Roger',
+      messageBrief: 'alpine mountains, escaping to a new cabin together',
+      coverTitle: false
+    });
+    const project = createProject({
+      occasion,
+      style,
+      recipient: 'Mum and Dad',
+      sender: 'Roger',
+      messageBrief: 'alpine mountains, escaping to a new cabin together',
+      provider: 'none',
+      references: [],
+      prompts,
+      coverTitle: false,
+      insideStyle: 'typewriter',
+      message: defaultMessage({
+        occasion,
+        recipient: 'Mum and Dad',
+        sender: 'Roger',
+        messageBrief: 'alpine mountains, escaping to a new cabin together'
+      })
+    });
+
+    await renderProject(project, dir);
+    const pdf = await readFile(path.join(dir, 'card.pdf'), 'utf8');
+    const preview = await readFile(path.join(dir, 'preview.svg'), 'utf8');
+    assert.match(pdf, /\/BaseFont \/Courier-Oblique/);
+    assert.doesNotMatch(pdf, /For You/);
+    assert.doesNotMatch(preview, /For You/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
