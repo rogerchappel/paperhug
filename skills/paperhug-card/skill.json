@@ -1,0 +1,89 @@
+{
+  "name": "Paperhug Card Maker",
+  "slug": "paperhug-card",
+  "description": "Create, refine, preview, and print greeting cards with the Paperhug CLI on an OpenClaw host.",
+  "version": "0.1.0",
+  "source": "github",
+  "metadata": {
+    "version": 1,
+    "kind": "cli-skill",
+    "category": "creative",
+    "icon": "card",
+    "reviewSafeByDefault": true,
+    "requiresCli": {
+      "command": "paperhug",
+      "version": ">=0.1.0",
+      "install": {
+        "npm": "npm install -g paperhug",
+        "local": "npm link"
+      }
+    },
+    "auth": {
+      "type": "header-api-key",
+      "secretRefField": "openaiApiKey"
+    },
+    "openclaw": {
+      "requires": {
+        "bins": ["paperhug", "jq"],
+        "env": ["OPENAI_API_KEY"]
+      },
+      "primaryEnv": "OPENAI_API_KEY"
+    },
+    "configSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "openaiApiKey": {
+          "type": "object",
+          "title": "OpenAI API key",
+          "description": "CrewCMD vault secret used as OPENAI_API_KEY for generated artwork.",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Secret name"
+            }
+          },
+          "required": ["name"]
+        },
+        "paperhugBin": {
+          "type": "string",
+          "title": "Paperhug command",
+          "default": "paperhug"
+        },
+        "cardsDir": {
+          "type": "string",
+          "title": "Cards folder",
+          "default": "$HOME/Paperhug/cards"
+        },
+        "printer": {
+          "type": "string",
+          "title": "Printer name",
+          "default": "Brother_MFC_J4440DW"
+        },
+        "provider": {
+          "type": "string",
+          "title": "Image provider",
+          "enum": ["openai", "none"],
+          "default": "openai"
+        },
+        "allowPrint": {
+          "type": "boolean",
+          "title": "Allow local printing",
+          "default": true
+        }
+      },
+      "required": ["openaiApiKey", "printer"]
+    },
+    "configExample": {
+      "openaiApiKey": {
+        "name": "paperhug-openai-api-key"
+      },
+      "paperhugBin": "paperhug",
+      "cardsDir": "$HOME/Paperhug/cards",
+      "printer": "Brother_MFC_J4440DW",
+      "provider": "openai",
+      "allowPrint": true
+    }
+  }
+}
