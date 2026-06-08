@@ -14,7 +14,8 @@
     "src",
     "skills",
     "templates",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "check": "node --check src/cli.js && node --test",
@@ -44,5 +45,13 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/paperhug.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/paperhug/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/paperhug#readme"
 }
