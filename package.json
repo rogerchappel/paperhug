@@ -32,7 +32,8 @@
     "build:web": "npm --workspace @paperhug/web run build",
     "preview:web": "npm --workspace @paperhug/web run preview",
     "build:mobile": "npm --workspace @paperhug/mobile run build",
-    "check:apps": "npm run build:web && npm run build:mobile"
+    "check:apps": "npm run build:web && npm run build:mobile",
+    "release:readiness": "node scripts/validate-release-readiness.mjs"
   },
   "keywords": [
     "greeting-card",
