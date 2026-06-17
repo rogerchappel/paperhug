@@ -167,6 +167,17 @@ documents needed for release review: `README.md`, `LICENSE`, `SECURITY.md`, `CHA
 Run `npm run package:smoke` or `npm pack --dry-run` before publishing to
 confirm those files are still present in the tarball.
 
+## Release readiness
+
+Run the same checks that CI uses before opening a release PR:
+
+```sh
+npm run release:readiness
+npm run release:check
+```
+
+`release:readiness` validates repository metadata, the package files allowlist, package smoke coverage, and CI placeholder cleanup. `release:check` runs the project build, test, smoke, and package dry-run checks where configured.
+
 ## License
 
 MIT
