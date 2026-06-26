@@ -26,7 +26,7 @@
     "build": "node --check src/cli.js && npm run build:web && npm run build:mobile",
     "test": "node --test",
     "smoke": "node src/cli.js quick birthday --for Test --message cheerful --provider none --out tmp/smoke --force",
-    "package:smoke": "npm pack --dry-run",
+    "package:smoke": "test -f src/cli.js && test -f src/index.js && test -f templates/occasions.json && test -f skills/paperhug-card/SKILL.md && npm pack --dry-run",
     "release:check": "npm run check && npm run smoke && npm run package:smoke",
     "dev:web": "npm --workspace @paperhug/web run dev",
     "build:web": "npm --workspace @paperhug/web run build",
