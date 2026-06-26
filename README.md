@@ -165,7 +165,8 @@ npm run release:check
 The npm package allowlist includes the runtime files plus the public support
 documents needed for release review: `README.md`, `LICENSE`, `SECURITY.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`.
 Run `npm run package:smoke` or `npm pack --dry-run` before publishing to
-confirm those files are still present in the tarball.
+confirm the CLI, runtime entrypoint, templates, skill, and support docs are
+still present in the tarball.
 
 ## Release readiness
 
@@ -177,6 +178,15 @@ npm run release:check
 ```
 
 `release:readiness` validates repository metadata, the package files allowlist, package smoke coverage, and CI placeholder cleanup. `release:check` runs the project build, test, smoke, and package dry-run checks where configured.
+
+## Limitations
+
+- Prompt-only mode is local and offline, but generated card folders can contain
+  personal names, messages, and copied reference-image metadata.
+- OpenAI image generation requires an explicit `OPENAI_API_KEY` and may send
+  prompt text and selected reference content to the configured provider.
+- Printing uses the host `lp` command and depends on the local printer driver
+  accepting the requested A4 landscape and duplex options.
 
 ## License
 
