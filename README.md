@@ -156,6 +156,7 @@ paperhug quick mothers-day \
 ```bash
 npm test
 npm run smoke
+npm run dependency:audit
 bash scripts/validate.sh
 npm run release:check
 ```
@@ -178,6 +179,9 @@ npm run release:check
 ```
 
 `release:readiness` validates repository metadata, the package files allowlist, package smoke coverage, and CI placeholder cleanup. `release:check` runs the project build, test, smoke, and package dry-run checks where configured.
+Release readiness also audits production dependencies with
+`npm audit --omit=dev`. Keep the committed root lockfile current so the web
+and mobile workspaces resolve the same audited Vite/PostCSS dependency graph.
 
 ## Limitations
 
