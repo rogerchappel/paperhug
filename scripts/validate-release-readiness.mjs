@@ -10,7 +10,12 @@ const requireField = (condition, message) => { if (!condition) failures.push(mes
 requireField(packageJson.repository, 'package.json must declare repository metadata');
 requireField(Array.isArray(packageJson.files) && packageJson.files.length > 0, 'package.json must declare a non-empty files allowlist');
 requireField(scripts['package:smoke'], 'package.json scripts must include package:smoke');
+requireField(scripts['dependency:audit'], 'package.json scripts must include dependency:audit');
 requireField(scripts['release:check'], 'package.json scripts must include release:check');
+requireField(
+  /(?:^|&&)\s*npm run dependency:audit(?:\s*&&|$)/.test(scripts['release:check'] ?? ''),
+  'release:check must run npm run dependency:audit',
+);
 
 const workflowDir = path.join(root, '.github', 'workflows');
 if (fs.existsSync(workflowDir)) {
