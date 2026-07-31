@@ -7,6 +7,9 @@ on:
       - releasebox.config.json
       - package.json
       - package-lock.json
+      - scripts/release-package.mjs
+      - test/release-package.test.js
+      - README.md
       - .github/workflows/release*.yml
 
 permissions:
@@ -39,6 +42,17 @@ jobs:
         run: node /tmp/releasebox/bin/releasebox.js check .
       - name: Run release checks
         run: npm run release:check
+      - name: Build and inspect package artifact
+        run: |
+          set -euo pipefail
+          npm pack --json | tee package-pack.json
+          package_file=$(node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s)[0].filename))" < package-pack.json)
+          tar -tzf "$package_file"
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: '*.tgz'
       - name: Release notes preview
         run: |
           node /tmp/releasebox/bin/releasebox.js notes . > release-notes-preview.md

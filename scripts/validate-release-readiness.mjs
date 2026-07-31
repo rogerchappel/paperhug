@@ -16,6 +16,10 @@ requireField(
   /(?:^|&&)\s*npm run dependency:audit(?:\s*&&|$)/.test(scripts['release:check'] ?? ''),
   'release:check must run npm run dependency:audit',
 );
+requireField(
+  /(?:^|&&)\s*npm run check:apps(?:\s*&&|$)/.test(scripts['release:check'] ?? ''),
+  'release:check must run npm run check:apps',
+);
 
 const workflowDir = path.join(root, '.github', 'workflows');
 if (fs.existsSync(workflowDir)) {
@@ -27,6 +31,10 @@ if (fs.existsSync(workflowDir)) {
   }
   const combined = workflowFiles.map((file) => fs.readFileSync(path.join(workflowDir, file), 'utf8')).join('\n');
   requireField(/release:check/.test(combined), 'CI workflows must run npm run release:check');
+  const releaseWorkflow = fs.readFileSync(path.join(workflowDir, 'release.yml'), 'utf8');
+  requireField(/verify-tag/.test(releaseWorkflow), 'release workflow must verify the tag version');
+  requireField(/npm publish/.test(releaseWorkflow), 'release workflow must publish the npm package');
+  requireField(/--provenance/.test(releaseWorkflow), 'npm publishing must include provenance');
 }
 
 if (failures.length > 0) {
