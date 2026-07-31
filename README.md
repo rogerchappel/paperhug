@@ -187,6 +187,27 @@ The current audited baseline resolves Vite 6.4.3, PostCSS 8.5.23, and
 `npm ci`, `npm run build`, `npm test`, `npm run dependency:audit`, and
 `npm run release:check`.
 
+### Publishing to npm
+
+Releases are published by pushing a `v<version>` tag whose version exactly
+matches `package.json`. The release workflow runs the complete release check,
+packs one tarball, publishes that same artifact with npm provenance, and then
+attaches it to the GitHub release. If the exact npm version already exists,
+publishing is skipped so rerunning the workflow is safe.
+
+Configure `paperhug` on npmjs.com as a trusted publisher for the GitHub
+repository `rogerchappel/paperhug`, workflow `release.yml`, and no environment
+(unless the workflow gains one). No long-lived npm token is required. Pull
+requests that affect release files run the dry-run workflow, which uploads an
+inspectable package artifact but never publishes it.
+
+Before tagging, run `npm ci && npm run release:check`, update the package
+version, and review `npm pack --dry-run`. If publishing fails, do not move or
+reuse the tag for different contents: fix the workflow or trusted-publisher
+configuration and rerun the failed job. If npm already contains the version,
+verify it with `npm view paperhug@<version> version dist.integrity` and rerun
+only to recover the GitHub release step.
+
 ## Limitations
 
 - Prompt-only mode is local and offline, but generated card folders can contain
