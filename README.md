@@ -204,7 +204,12 @@ inspectable package artifact but never publishes it.
 Before tagging, run `npm ci && npm run release:check`, update the package
 version, and review `npm pack --dry-run`. If publishing fails, do not move or
 reuse the tag for different contents: fix the workflow or trusted-publisher
-configuration and rerun the failed job. If npm already contains the version,
+configuration and rerun the failed job. Alternatively, run the **Release**
+workflow manually with the existing tag (for example, `v0.1.0`); manual
+recovery checks out that exact tag and is safe to repeat. The workflow waits
+for npm registry propagation, verifies the exact version and integrity, and
+runs that exact package's `paperhug --help` command before creating or
+repairing the GitHub release. If npm already contains the version,
 verify it with `npm view paperhug@<version> version dist.integrity` and rerun
 only to recover the GitHub release step.
 
