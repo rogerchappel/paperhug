@@ -179,13 +179,15 @@ npm run release:check
 ```
 
 `release:readiness` validates repository metadata, the package files allowlist, package smoke coverage, and CI placeholder cleanup. `release:check` runs the project build, test, smoke, and package dry-run checks where configured.
-Release readiness also audits production dependencies with
-`npm audit --omit=dev`. Keep the committed root lockfile current so the web
-and mobile workspaces resolve the same audited Vite/PostCSS dependency graph.
+Release readiness audits production dependencies with
+`npm run dependency:audit` (`npm audit --omit=dev`) and the complete development
+and build-tool dependency tree with `npm run dependency:audit:all` (`npm audit`).
+Keep the committed root lockfile current so the web and mobile workspaces
+resolve the same audited Vite/PostCSS dependency graph.
 The current audited baseline resolves Vite 6.4.3, PostCSS 8.5.23, and
 `@babel/core` 7.29.7. Verify a dependency refresh from a clean checkout with
-`npm ci`, `npm run build`, `npm test`, `npm run dependency:audit`, and
-`npm run release:check`.
+`npm ci`, `npm run build`, `npm test`, `npm run dependency:audit`,
+`npm run dependency:audit:all`, and `npm run release:check`.
 
 ### Publishing to npm
 
