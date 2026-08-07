@@ -12,7 +12,7 @@
     "cap:open:android": "capacitor open android"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.0",
+    "@capacitor/core": "^8.5.0",
     "@capacitor/filesystem": "^7.1.8",
     "@capacitor/share": "^7.0.4",
     "@paperhug/app-core": "0.1.0",
