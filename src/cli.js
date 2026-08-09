@@ -25,6 +25,18 @@ import {
 
 const occasionAliases = new Set(['birthday', 'mothers-day', 'mother', 'mum', 'mom', 'fathers-day', 'father', 'dad', 'anniversary', 'thank-you', 'thanks', 'thankyou', 'congratulations', 'congrats', 'new-baby', 'baby', 'custom']);
 
+const optionSchemas = {
+  quick: {
+    values: new Set(['occasion', 'for', 'to', 'recipient', 'from', 'style', 'message', 'idea', 'tone', 'text', 'title', 'inside-style', 'font', 'reference', 'provider', 'model', 'image-model', 'out']),
+    booleans: new Set(['cover-title', 'copy-references', 'force']),
+    repeatable: new Set(['reference'])
+  },
+  wizard: { values: new Set(['provider', 'out']), booleans: new Set(), repeatable: new Set() },
+  render: { values: new Set(), booleans: new Set(), repeatable: new Set() },
+  print: { values: new Set(['printer', 'duplex']), booleans: new Set(['dry-run']), negatable: new Set(['duplex']), repeatable: new Set() },
+  refine: { values: new Set(['note', 'setMessage', 'message', 'text']), booleans: new Set(), repeatable: new Set() }
+};
+
 async function main(argv = process.argv.slice(2)) {
   const [rawCommand, ...rest] = argv;
   const command = rawCommand || 'help';
@@ -42,7 +54,8 @@ async function main(argv = process.argv.slice(2)) {
   throw new Error(`Unknown command: ${command}. Run paperhug help.`);
 }
 
-function parseArgs(args) {
+function parseArgs(args, command) {
+  const schema = optionSchemas[command];
   const values = { _: [] };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -50,25 +63,32 @@ function parseArgs(args) {
       values._.push(arg);
       continue;
     }
-    const key = arg.slice(2);
-    if (key.startsWith('no-')) {
-      values[key.slice(3)] = false;
+    const option = arg.slice(2);
+    const negatedKey = option.startsWith('no-') ? option.slice(3) : null;
+    if (negatedKey) {
+      const negatable = schema.negatable || schema.booleans;
+      if (!negatable.has(negatedKey)) throw new Error(`Unknown option for ${command}: --${option}`);
+      values[negatedKey] = false;
       continue;
     }
+    if (schema.booleans.has(option)) {
+      values[option] = true;
+      continue;
+    }
+    if (!schema.values.has(option)) throw new Error(`Unknown option for ${command}: --${option}`);
     const next = args[index + 1];
     if (!next || next.startsWith('--')) {
-      values[key] = true;
-      continue;
+      throw new Error(`Option --${option} requires a value.`);
     }
     index += 1;
-    if (key === 'reference') values.reference = [...(values.reference || []), next];
-    else values[key] = next;
+    if (schema.repeatable.has(option)) values[option] = [...(values[option] || []), next];
+    else values[option] = next;
   }
   return values;
 }
 
 async function quick(args) {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, 'quick');
   const occasionId = parsed._[0] || parsed.occasion || 'custom';
   const recipient = parsed.for || parsed.to || parsed.recipient;
   if (!recipient) throw new Error('quick requires --for <recipient>.');
@@ -117,7 +137,7 @@ function buildMessageBrief(parsed) {
 }
 
 async function wizard(args) {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, 'wizard');
   const rl = readline.createInterface({ input, output });
   try {
     const occasion = await rl.question('Occasion (birthday, mothers-day, fathers-day, anniversary, thank-you, congratulations, new-baby, custom): ') || 'custom';
@@ -132,7 +152,7 @@ async function wizard(args) {
 }
 
 async function render(args) {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, 'render');
   const projectPath = parsed._[0];
   if (!projectPath) throw new Error('render requires <project.json>.');
   const project = await readProject(projectPath);
@@ -143,7 +163,7 @@ async function render(args) {
 }
 
 async function printCard(args) {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, 'print');
   const target = parsed._[0];
   if (!target) throw new Error('print requires <project.json|card.pdf>.');
 
@@ -189,7 +209,7 @@ function runPrintCommand(command, args) {
 }
 
 async function refine(args) {
-  const parsed = parseArgs(args);
+  const parsed = parseArgs(args, 'refine');
   const projectPath = parsed._[0];
   if (!projectPath) throw new Error('refine requires <project.json>.');
   const project = await readProject(projectPath);
