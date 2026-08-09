@@ -1,13 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import os from 'node:os';
 import path from 'node:path';
 
 const execFileAsync = promisify(execFile);
 const cli = path.resolve('src/cli.js');
+
+async function assertCliError(args, message) {
+  await assert.rejects(
+    execFileAsync(process.execPath, [cli, ...args]),
+    (error) => {
+      const parsed = JSON.parse(error.stderr);
+      assert.equal(parsed.ok, false);
+      assert.match(parsed.error, message);
+      return true;
+    }
+  );
+}
+
+test('quick rejects missing option values and unknown options', async () => {
+  await assertCliError(['quick', 'birthday', '--for'], /--for requires a value/);
+  await assertCliError(['quick', 'birthday', '--for', 'Test', '--reference'], /--reference requires a value/);
+  await assertCliError(['quick', 'birthday', '--for', 'Test', '--bogus'], /Unknown option for quick: --bogus/);
+});
 
 test('templates list prints occasions and styles', async () => {
   const { stdout } = await execFileAsync(process.execPath, [cli, 'templates', 'list']);
@@ -67,6 +85,26 @@ test('quick accepts card ideas, inside styles, and title-free covers', async () 
     assert.match(project.messageBrief, /new cabin/);
     assert.match(project.message, /fresh mountain air/);
     assert.match(project.prompts.imagePrompt, /Do not include readable cover text/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('quick accepts boolean flags and repeated references', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-options-'));
+  try {
+    const first = path.join(dir, 'first.png');
+    const second = path.join(dir, 'second.png');
+    await Promise.all([writeFile(first, 'first'), writeFile(second, 'second')]);
+    const out = path.join(dir, 'card');
+    const { stdout } = await execFileAsync(process.execPath, [
+      cli, 'quick', 'birthday', '--for', 'Test', '--reference', first, '--reference', second,
+      '--no-copy-references', '--force', '--provider', 'none', '--out', out
+    ]);
+    const parsed = JSON.parse(stdout);
+    const project = JSON.parse(await readFile(parsed.project, 'utf8'));
+    assert.equal(project.references.length, 2);
+    assert.deepEqual(project.references.map((reference) => reference.originalPath), [first, second]);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
