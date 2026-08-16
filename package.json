@@ -29,7 +29,7 @@
     "package:smoke": "test -f src/cli.js && test -f src/index.js && test -f templates/occasions.json && test -f skills/paperhug-card/SKILL.md && npm pack --dry-run",
     "dependency:audit": "npm audit --omit=dev",
     "dependency:audit:all": "npm audit",
-    "release:check": "npm run check && npm run check:apps && npm run dependency:audit && npm run dependency:audit:all && npm run smoke && npm run package:smoke",
+    "release:check": "npm run release:readiness && npm run check && npm run check:apps && npm run dependency:audit && npm run dependency:audit:all && npm run smoke && npm run package:smoke",
     "dev:web": "npm --workspace @paperhug/web run dev",
     "build:web": "npm --workspace @paperhug/web run build",
     "preview:web": "npm --workspace @paperhug/web run preview",
