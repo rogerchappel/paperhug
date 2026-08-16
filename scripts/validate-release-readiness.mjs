@@ -7,6 +7,28 @@ const scripts = packageJson.scripts ?? {};
 const failures = [];
 const requireField = (condition, message) => { if (!condition) failures.push(message); };
 
+const agentsPath = path.join(root, 'AGENTS.md');
+requireField(fs.existsSync(agentsPath), 'repository must include AGENTS.md');
+if (fs.existsSync(agentsPath)) {
+  const agents = fs.readFileSync(agentsPath, 'utf8');
+  const contextFields = ['Repository', 'Primary maintainer', 'Default branch', 'Package manager'];
+  const context = Object.fromEntries(contextFields.map((field) => {
+    const match = agents.match(new RegExp('^- ' + field + ': `([^`]*)`', 'm'));
+    return [field, match?.[1].trim() ?? ''];
+  }));
+
+  for (const field of contextFields) {
+    requireField(context[field], `AGENTS.md Project Context must declare a non-empty ${field}`);
+  }
+
+  const branchRef = agents.match(/^- Branch from the latest `([^`]*)` before editing\.$/m)?.[1].trim() ?? '';
+  requireField(branchRef, 'AGENTS.md Branch Policy must declare a non-empty branch ref');
+  requireField(
+    !context['Default branch'] || !branchRef || branchRef === context['Default branch'],
+    'AGENTS.md Branch Policy branch ref must match the default branch',
+  );
+}
+
 requireField(packageJson.repository, 'package.json must declare repository metadata');
 requireField(Array.isArray(packageJson.files) && packageJson.files.length > 0, 'package.json must declare a non-empty files allowlist');
 requireField(scripts['package:smoke'], 'package.json scripts must include package:smoke');
