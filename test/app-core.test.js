@@ -35,6 +35,20 @@ describe('@paperhug/app-core', () => {
     assert.equal(filenameForDraft(draft), 'birthday-for-aunty-jo.pdf');
   });
 
+  it('preserves accented, non-Latin, and emoji text in app PDFs', () => {
+    const draft = createCardDraft({ recipient: 'Zoë 李', sender: 'José', coverTitle: 'Félicitations', message: '生日快乐 🎉' });
+    const pdf = createCardPdf(draft);
+
+    assert.doesNotMatch(pdf, /Zo\?|Jos\?|F\?licitations|\?\?\?\?/);
+    assert.match(pdf, /FEFF004600E9006C0069006300690074006100740069006F006E0073/);
+    assert.match(pdf, /FEFF751F65E55FEB4E500020D83CDF89/);
+    assert.match(pdf, /FEFF0046006F00720020005A006F00EB0020674E/);
+    assert.match(pdf, /FEFF00460072006F006D0020004A006F007300E9/);
+    assert.ok(createCardPdfBytes(draft).byteLength > 500);
+    assert.match(pdf, /MediaBox \[0 0 841\.89 595\.28\]/);
+    assert.match(pdf, /Paperhug print intent: A4 landscape duplex=short-edge/);
+  });
+
   it('exposes family-friendly starter choices for app surfaces', () => {
     assert.ok(occasions.length >= 4);
     assert.ok(styles.length >= 4);

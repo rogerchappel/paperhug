@@ -128,7 +128,8 @@ function createPdf(pages, printIntent) {
 
   const catalogId = add('');
   const pagesId = add('');
-  const fontId = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  const descendantFontId = add('<< /Type /Font /Subtype /CIDFontType2 /BaseFont /ArialUnicodeMS /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /DW 1000 >>');
+  const fontId = add(`<< /Type /Font /Subtype /Type0 /BaseFont /ArialUnicodeMS /Encoding /Identity-H /DescendantFonts [${descendantFontId} 0 R] >>`);
   const pageIds = [];
 
   for (const content of pages) {
@@ -176,7 +177,7 @@ function pageContent(items, { decorative = false } = {}) {
     const x = item.x || 72;
     const leading = item.leading || Math.round(size * 1.45);
     for (const line of wrapText(item.text, item.max || 68)) {
-      commands.push(`BT /F1 ${size} Tf ${x} ${y} Td (${escapePdfText(line)}) Tj ET`);
+      commands.push(`BT /F1 ${size} Tf ${x} ${y} Td <${encodePdfText(line)}> Tj ET`);
       y -= leading;
     }
   }
@@ -215,8 +216,19 @@ function slugify(value) {
   return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'card';
 }
 
-function escapePdfText(value) {
-  return String(value).replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '?').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+function encodePdfText(value) {
+  let hex = 'FEFF';
+  for (const character of String(value)) {
+    const codePoint = character.codePointAt(0);
+    if (codePoint <= 0xffff) {
+      hex += codePoint.toString(16).padStart(4, '0');
+      continue;
+    }
+    const adjusted = codePoint - 0x10000;
+    hex += (0xd800 + (adjusted >> 10)).toString(16).padStart(4, '0');
+    hex += (0xdc00 + (adjusted & 0x3ff)).toString(16).padStart(4, '0');
+  }
+  return hex.toUpperCase();
 }
 
 function byteLength(value) {
