@@ -50,6 +50,11 @@ The shared app core can now turn a draft into:
 - a two-page A4 landscape PDF;
 - bytes/Blob helpers for web download and native handoff.
 
+Card text is encoded as UTF-16 in browser and mobile PDFs so accented names,
+non-Latin scripts, and emoji are not silently replaced with question marks.
+Glyph display uses the PDF viewer's Unicode font substitution; colour emoji may
+appear as monochrome glyphs.
+
 The web app downloads the generated PDF or project JSON directly in the browser. The mobile shell writes the PDF to Capacitor cache and opens the native share sheet on iOS/Android; that is the handoff point for AirPrint, Android Print Framework, Files, Messages, or other installed destinations.
 
 ## Next implementation steps
