@@ -26,7 +26,7 @@
     "build": "node --check src/cli.js && npm run build:web && npm run build:mobile",
     "test": "node --test",
     "smoke": "node src/cli.js quick birthday --for Test --message cheerful --provider none --out tmp/smoke --force",
-    "package:smoke": "test -f src/cli.js && test -f src/index.js && test -f templates/occasions.json && test -f skills/paperhug-card/SKILL.md && npm pack --dry-run",
+    "package:smoke": "node scripts/package-smoke.mjs",
     "dependency:audit": "npm audit --omit=dev",
     "dependency:audit:all": "npm audit",
     "release:check": "npm run release:readiness && npm run check && npm run check:apps && npm run dependency:audit && npm run dependency:audit:all && npm run smoke && npm run package:smoke",
