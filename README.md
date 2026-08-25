@@ -76,9 +76,9 @@ paperhug birthday --for Mum --message cheerful
 paperhug wizard
 paperhug refine <project.json> --note "less cheesy"
 paperhug render <project.json>
-paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex]
-paperhug templates list
-paperhug providers list
+paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex] [--dry-run]
+paperhug templates [list]
+paperhug providers [list]
 ```
 
 ### Useful options
@@ -101,7 +101,7 @@ paperhug providers list
 
 ### Printing
 
-`paperhug print` shells out to the system `lp` command and always includes explicit A4 landscape print options. By default it also requests double-sided short-edge duplex, which matches the landscape half-fold card layout. Use `--no-duplex` only when you want to print pages separately. Set `PAPERHUG_PRINTER=<name>` or pass `--printer <name>` to pick a printer.
+`paperhug print` shells out to the system `lp` command and always includes explicit A4 landscape print options. By default it also requests double-sided short-edge duplex, which matches the landscape half-fold card layout. Use `--no-duplex` only when you want to print pages separately. Set `PAPERHUG_PRINTER=<name>` or pass `--printer <name>` to pick a printer. Use `--dry-run` to print the planned `lp` arguments without sending the file to a printer.
 
 
 ## Occasions
