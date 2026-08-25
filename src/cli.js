@@ -49,9 +49,15 @@ async function main(argv = process.argv.slice(2)) {
   if (command === 'render') return render(rest);
   if (command === 'print') return printCard(rest);
   if (command === 'refine') return refine(rest);
-  if (occasionAliases.has(command)) return quick([command, ...rest]);
+  if (occasionAliases.has(command)) return quick(rest, command);
 
   throw new Error(`Unknown command: ${command}. Run paperhug help.`);
+}
+
+function requirePositionalArity(parsed, { command, min = 0, max = min, usage }) {
+  if (parsed._.length < min || parsed._.length > max) {
+    throw new Error(`Usage: paperhug ${usage || command}`);
+  }
 }
 
 function parseArgs(args, command) {
@@ -87,9 +93,14 @@ function parseArgs(args, command) {
   return values;
 }
 
-async function quick(args) {
+async function quick(args, occasionAlias = null) {
   const parsed = parseArgs(args, 'quick');
-  const occasionId = parsed._[0] || parsed.occasion || 'custom';
+  requirePositionalArity(parsed, {
+    command: occasionAlias || 'quick',
+    max: occasionAlias ? 0 : 1,
+    usage: occasionAlias ? `${occasionAlias} [options]` : 'quick <occasion> [options]'
+  });
+  const occasionId = occasionAlias || parsed._[0] || parsed.occasion || 'custom';
   const recipient = parsed.for || parsed.to || parsed.recipient;
   if (!recipient) throw new Error('quick requires --for <recipient>.');
 
@@ -138,6 +149,7 @@ function buildMessageBrief(parsed) {
 
 async function wizard(args) {
   const parsed = parseArgs(args, 'wizard');
+  requirePositionalArity(parsed, { command: 'wizard', usage: 'wizard' });
   const rl = readline.createInterface({ input, output });
   try {
     const occasion = await rl.question('Occasion (birthday, mothers-day, fathers-day, anniversary, thank-you, congratulations, new-baby, custom): ') || 'custom';
@@ -153,8 +165,8 @@ async function wizard(args) {
 
 async function render(args) {
   const parsed = parseArgs(args, 'render');
+  requirePositionalArity(parsed, { command: 'render', min: 1, max: 1, usage: 'render <project.json>' });
   const projectPath = parsed._[0];
-  if (!projectPath) throw new Error('render requires <project.json>.');
   const project = await readProject(projectPath);
   const outputDir = path.dirname(path.resolve(projectPath));
   await renderProject(project, outputDir);
@@ -164,8 +176,8 @@ async function render(args) {
 
 async function printCard(args) {
   const parsed = parseArgs(args, 'print');
+  requirePositionalArity(parsed, { command: 'print', min: 1, max: 1, usage: 'print <project.json|card.pdf> [options]' });
   const target = parsed._[0];
-  if (!target) throw new Error('print requires <project.json|card.pdf>.');
 
   const resolvedTarget = path.resolve(target);
   const pdfPath = resolvedTarget.endsWith('.json') ? path.join(path.dirname(resolvedTarget), 'card.pdf') : resolvedTarget;
@@ -210,8 +222,8 @@ function runPrintCommand(command, args) {
 
 async function refine(args) {
   const parsed = parseArgs(args, 'refine');
+  requirePositionalArity(parsed, { command: 'refine', min: 1, max: 1, usage: 'refine <project.json> [options]' });
   const projectPath = parsed._[0];
-  if (!projectPath) throw new Error('refine requires <project.json>.');
   const project = await readProject(projectPath);
   let note = parsed.note || parsed.setMessage || parsed.message;
   if (!note) {
@@ -233,13 +245,17 @@ async function refine(args) {
 }
 
 async function templates(args) {
-  const sub = args[0] || 'list';
+  const parsed = { _: args };
+  requirePositionalArity(parsed, { command: 'templates', max: 1, usage: 'templates [list]' });
+  const sub = parsed._[0] || 'list';
   if (sub !== 'list') throw new Error('templates only supports: list');
   console.log(JSON.stringify({ occasions: await loadOccasions(), styles: await loadStyles() }, null, 2));
 }
 
 async function providersCommand(args) {
-  const sub = args[0] || 'list';
+  const parsed = { _: args };
+  requirePositionalArity(parsed, { command: 'providers', max: 1, usage: 'providers [list]' });
+  const sub = parsed._[0] || 'list';
   if (sub !== 'list') throw new Error('providers only supports: list');
   console.log(JSON.stringify({ providers: providers.map(providerStatus) }, null, 2));
 }
