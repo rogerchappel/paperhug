@@ -27,6 +27,23 @@ test('quick rejects missing option values and unknown options', async () => {
   await assertCliError(['quick', 'birthday', '--for', 'Test', '--bogus'], /Unknown option for quick: --bogus/);
 });
 
+test('commands reject surplus positional operands before acting', async () => {
+  await assertCliError(['quick', 'birthday', 'unexpected', '--for', 'Test'], /Usage: paperhug quick <occasion>/);
+  await assertCliError(['birthday', 'unexpected', '--for', 'Test'], /Usage: paperhug birthday/);
+  await assertCliError(['wizard', 'unexpected'], /Usage: paperhug wizard/);
+  await assertCliError(['render', 'project.json', 'unexpected'], /Usage: paperhug render <project\.json>/);
+  await assertCliError(['print', 'card.pdf', 'unexpected', '--dry-run'], /Usage: paperhug print <project\.json\|card\.pdf>/);
+  await assertCliError(['refine', 'project.json', 'unexpected', '--note', 'clearer'], /Usage: paperhug refine <project\.json>/);
+  await assertCliError(['templates', 'list', 'unexpected'], /Usage: paperhug templates \[list\]/);
+  await assertCliError(['providers', 'list', 'unexpected'], /Usage: paperhug providers \[list\]/);
+});
+
+test('commands reject missing required positional operands', async () => {
+  await assertCliError(['render'], /Usage: paperhug render <project\.json>/);
+  await assertCliError(['print', '--dry-run'], /Usage: paperhug print <project\.json\|card\.pdf>/);
+  await assertCliError(['refine', '--note', 'clearer'], /Usage: paperhug refine <project\.json>/);
+});
+
 test('templates list prints occasions and styles', async () => {
   const { stdout } = await execFileAsync(process.execPath, [cli, 'templates', 'list']);
   const parsed = JSON.parse(stdout);
