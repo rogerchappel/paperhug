@@ -94,6 +94,7 @@ paperhug providers [list]
 - `--inside-style <style>` — inside typography treatment: `classic-serif`, `modern-sans`, `typewriter`, or `script`.
 - `--reference <path>` — local reference image path; repeat the option to supply more than one.
 - `--provider none` — prompt-only mode. This is the default.
+- `--provider nano-banana` — recognized placeholder; artwork generation is not implemented yet.
 - `--provider openai` — generate front-cover artwork with OpenAI Images and embed it into the printable PDF.
 - `--model <model>` — override the selected provider model, for example `gpt-image-1.5`.
 - `--out <dir>` — output base directory.
