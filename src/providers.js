@@ -30,7 +30,11 @@ export const providers = [
 ];
 
 export function findProvider(id = 'none') {
-  return providers.find((provider) => provider.id === id) || providers[0];
+  const provider = providers.find((candidate) => candidate.id === id);
+  if (!provider) {
+    throw new Error(`Unknown provider: ${id}. Supported provider IDs: ${providers.map((candidate) => candidate.id).join(', ')}.`);
+  }
+  return provider;
 }
 
 export function providerStatus(provider) {

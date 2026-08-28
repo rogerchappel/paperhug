@@ -150,6 +150,7 @@ function buildMessageBrief(parsed) {
 async function wizard(args) {
   const parsed = parseArgs(args, 'wizard');
   requirePositionalArity(parsed, { command: 'wizard', usage: 'wizard' });
+  findProvider(parsed.provider || 'none');
   const rl = readline.createInterface({ input, output });
   try {
     const occasion = await rl.question('Occasion (birthday, mothers-day, fathers-day, anniversary, thank-you, congratulations, new-baby, custom): ') || 'custom';
@@ -261,7 +262,7 @@ async function providersCommand(args) {
 }
 
 function help() {
-  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--idea <story>] [--inside-style classic-serif|modern-sans|typewriter|script] [--reference <path>] [--provider none|openai]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex] [--dry-run]\n  paperhug templates [list]\n  paperhug providers [list]\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs. Use --provider openai with OPENAI_API_KEY for generated front-cover artwork embedded in the printable PDF. Use --no-cover-title when the generated artwork should carry any stylized text itself.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
+  console.log(`paperhug — print-at-home greeting cards from a friendly CLI\n\nUsage:\n  paperhug quick <occasion> --for <name> [--from <name>] [--style <style>] [--message <brief>] [--idea <story>] [--inside-style classic-serif|modern-sans|typewriter|script] [--reference <path>] [--provider none|nano-banana|openai]\n  paperhug birthday --for Mum --style "warm watercolour garden" --message "funny and grateful"\n  paperhug wizard\n  paperhug refine <project.json> --note "less cheesy"\n  paperhug render <project.json>\n  paperhug print <project.json|card.pdf> [--printer <name>] [--no-duplex] [--dry-run]\n  paperhug templates [list]\n  paperhug providers [list]\n\nDefault provider is none, which makes no network calls and writes prompts plus printable placeholder PDFs. Use --provider openai with OPENAI_API_KEY for generated front-cover artwork embedded in the printable PDF. nano-banana is a documented placeholder and is not implemented yet. Use --no-cover-title when the generated artwork should carry any stylized text itself.\n\nThe print command always sends A4 landscape output by default and uses double-sided short-edge duplex unless --no-duplex is supplied.`);
 }
 
 main().catch((error) => {
