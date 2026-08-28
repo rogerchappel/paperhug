@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import os from 'node:os';
 import path from 'node:path';
@@ -55,6 +55,24 @@ test('providers list exposes prompt-only mode', async () => {
   const { stdout } = await execFileAsync(process.execPath, [cli, 'providers', 'list']);
   const parsed = JSON.parse(stdout);
   assert.equal(parsed.providers.find((item) => item.id === 'none').usable, true);
+});
+
+test('quick, occasion aliases, and wizard reject unknown providers before changing output', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-provider-'));
+  try {
+    const outputDir = path.join(dir, 'birthday-for-test');
+    const marker = path.join(outputDir, 'keep.txt');
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(marker, 'preserve me');
+    const providerError = /Unknown provider: typo\. Supported provider IDs: none, nano-banana, openai/;
+
+    await assertCliError(['quick', 'birthday', '--for', 'Test', '--provider', 'typo', '--out', dir, '--force'], providerError);
+    await assertCliError(['birthday', '--for', 'Test', '--provider', 'typo', '--out', dir, '--force'], providerError);
+    await assertCliError(['wizard', '--provider', 'typo', '--out', dir], providerError);
+    assert.equal(await readFile(marker, 'utf8'), 'preserve me');
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test('quick prompt-only mode writes a project and valid PDF', async () => {
