@@ -15,6 +15,13 @@ import {
   renderProject
 } from '../src/index.js';
 
+test('provider lookup rejects unknown IDs with the supported grammar', () => {
+  assert.throws(
+    () => findProvider('typo'),
+    /Unknown provider: typo\. Supported provider IDs: none, nano-banana, openai/,
+  );
+});
+
 test('OpenAI provider is usable when configured', async () => {
   await withEnv('OPENAI_API_KEY', 'test-key', () => {
     const status = providerStatus(findProvider('openai'));
