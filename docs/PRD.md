@@ -29,8 +29,10 @@ Making a personalised card should be faster than driving to the shop. Generic im
 
 `paperhug` should make the first-card experience mind-bogglingly fast:
 
+After installing the local tarball as documented in the README:
+
 ```bash
-npx paperhug birthday --for "Mum" --style "warm watercolour garden" --message "funny and grateful"
+paperhug birthday --for "Mum" --style "warm watercolour garden" --message "funny and grateful"
 ```
 
 The output should be a small folder containing a front image, a back/inside message page, a print-ready A4 PDF, a preview image, and a reusable project JSON file.
@@ -167,7 +169,7 @@ Reference images should be copied into the project output folder or recorded by 
 Advanced mode should feel like a creative loop:
 
 ```bash
-paperhug wizard --conversation
+paperhug wizard
 paperhug refine dist/mum-card/project.json
 ```
 
@@ -233,7 +235,7 @@ dist/<card-slug>/
 
 ```bash
 # Fastest path
-npx paperhug birthday --for "Mum" --style "watercolour Australian garden" --message "warm and funny"
+paperhug birthday --for "Mum" --style "watercolour Australian garden" --message "warm and funny"
 
 # More explicit quick mode
 paperhug quick mothers-day \
@@ -241,8 +243,7 @@ paperhug quick mothers-day \
   --from "Roger" \
   --style "warm watercolour" \
   --message "grateful, funny, not too cheesy" \
-  --layout a4-glue-front-back \
-  --provider nano-banana \
+  --provider none \
   --reference ./mum-and-kids.jpg
 
 # Interactive mode
@@ -251,8 +252,8 @@ paperhug wizard
 # Advanced conversational refinement
 paperhug refine dist/mothers-day-for-mum/project.json
 
-# Re-render without paying for image generation again
-paperhug render dist/mothers-day-for-mum/project.json --no-generate
+# Re-render from saved project inputs without generating new artwork
+paperhug render dist/mothers-day-for-mum/project.json
 
 # Inspect installed templates/providers
 paperhug templates list

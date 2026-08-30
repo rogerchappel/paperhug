@@ -22,7 +22,7 @@
     "CODE_OF_CONDUCT.md"
   ],
   "scripts": {
-    "check": "node --check src/cli.js && node --test",
+    "check": "node --check src/cli.js && node scripts/prd-doc-contract.mjs && node --test",
     "build": "node --check src/cli.js && npm run build:web && npm run build:mobile",
     "test": "node --test",
     "smoke": "node src/cli.js quick birthday --for Test --message cheerful --provider none --out tmp/smoke --force",
