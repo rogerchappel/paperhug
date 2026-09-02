@@ -41,12 +41,14 @@ npm run release:check
 
 A release is eligible when all commands pass and a prompt-only card artifact exists under `tmp/smoke/`.
 
-## Dogfood flow after release
+## Dogfood flow before registry publication
 
-Use the released CLI locally for a same-day card:
+First follow the local-tarball installation in the README's
+[Quick start](../README.md#quick-start). The package is not yet available from
+the npm registry, so use the installed `paperhug` command for a same-day card:
 
 ```bash
-npx paperhug birthday \
+paperhug birthday \
   --for "Mum" \
   --from "Roger" \
   --style "warm watercolour Australian native flowers" \

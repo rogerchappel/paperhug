@@ -50,12 +50,16 @@ export function validatePrdExamples(markdown) {
 }
 
 export async function checkPrd(root = '.') {
-  const markdown = await readFile(resolve(root, 'docs/PRD.md'), 'utf8');
-  const errors = validatePrdExamples(markdown);
-  if (errors.length) throw new Error(`PRD executable example contract failed:\n- ${errors.join('\n- ')}`);
+  const documents = ['docs/PRD.md', 'docs/ORCHESTRATION.md'];
+  const errors = [];
+  for (const document of documents) {
+    const markdown = await readFile(resolve(root, document), 'utf8');
+    errors.push(...validatePrdExamples(markdown).map((error) => `${document}: ${error}`));
+  }
+  if (errors.length) throw new Error(`Executable documentation contract failed:\n- ${errors.join('\n- ')}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   await checkPrd(process.argv[2] || '.');
-  console.log('PRD executable example contract passed');
+  console.log('Executable documentation contract passed');
 }
