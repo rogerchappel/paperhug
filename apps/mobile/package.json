@@ -23,6 +23,6 @@
     "vite": "^6.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^8.5.0"
   }
 }
