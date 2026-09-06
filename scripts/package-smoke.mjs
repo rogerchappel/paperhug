@@ -13,8 +13,9 @@ try {
   if (/\bnpx\s+paperhug\s+(?!will\b)/.test(readme)) {
     throw new Error('README must not present npx paperhug as available before registry publication');
   }
+  const releaseAsset = `https://github.com/rogerchappel/paperhug/releases/download/v${manifest.version}/paperhug-${manifest.version}.tgz`;
   for (const command of [
-    'npm ci', 'npm pack', `npm install --global ./paperhug-${manifest.version}.tgz`,
+    `npm install --global ${releaseAsset}`,
     'paperhug --help', 'paperhug birthday'
   ]) {
     if (!readme.includes(command)) throw new Error(`README is missing tested install command: ${command}`);
