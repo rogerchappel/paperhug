@@ -14,7 +14,7 @@
       "command": "paperhug",
       "version": ">=0.1.0",
       "install": {
-        "npm": "npm install -g paperhug",
+        "npm": "npm install -g https://github.com/rogerchappel/paperhug/releases/download/v0.1.0/paperhug-0.1.0.tgz",
         "local": "npm link"
       }
     },
