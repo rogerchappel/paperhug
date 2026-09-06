@@ -16,6 +16,13 @@ Paperhug is a CLI skill. The runtime must have:
 - A configured printer when the user asks to print.
 - `jq` available if you read OpenClaw skill config from `OPENCLAW_CONFIG_PATH`.
 
+Paperhug is not yet published to the npm registry. Install the versioned
+release asset when the command is unavailable:
+
+```bash
+npm install -g https://github.com/rogerchappel/paperhug/releases/download/v0.1.0/paperhug-0.1.0.tgz
+```
+
 Read config from the OpenClaw skill entry when available:
 
 ```bash

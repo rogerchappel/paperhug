@@ -7,6 +7,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ## [Unreleased]
 
+- Fixed the Paperhug skill installer to use the v0.1.0 GitHub release tarball
+  while the package remains absent from the npm registry.
 - Added repeatable trusted-publishing recovery plus exact npm registry,
   integrity, installation, and CLI verification before GitHub release updates.
 - Added release-readiness validation for package metadata, CI placeholder cleanup, and package smoke coverage.

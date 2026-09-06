@@ -26,21 +26,17 @@ See [`docs/APP_ARCHITECTURE.md`](docs/APP_ARCHITECTURE.md) and [`docs/CAPACITOR_
 
 ## Quick start
 
-`paperhug` is not yet published to the npm registry. From a fresh checkout,
-build a local release tarball and install that exact artifact:
+`paperhug` is not yet published to the npm registry. Install the versioned
+tarball from the GitHub release:
 
 ```bash
-git clone https://github.com/rogerchappel/paperhug.git
-cd paperhug
-npm ci
-npm pack
-npm install --global ./paperhug-0.1.0.tgz
+npm install --global https://github.com/rogerchappel/paperhug/releases/download/v0.1.0/paperhug-0.1.0.tgz
 paperhug --help
 ```
 
-The tarball name follows the version in `package.json`. Once a release is
-available from npm, `npx paperhug` will be the shorter registry-backed path.
-Until then, run the installed CLI directly:
+The release tag and tarball name match the version in `package.json`. Once a
+release is available from npm, `npx paperhug` will be the shorter
+registry-backed path. Until then, run the installed CLI directly:
 
 ```bash
 paperhug birthday \
