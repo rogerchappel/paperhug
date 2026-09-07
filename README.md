@@ -167,6 +167,7 @@ paperhug quick mothers-day \
 ## Development
 
 ```bash
+npm ci
 npm test
 npm run smoke
 npm run dependency:audit
