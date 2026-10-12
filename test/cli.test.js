@@ -125,21 +125,32 @@ test('quick accepts card ideas, inside styles, and title-free covers', async () 
   }
 });
 
-test('quick accepts boolean flags and repeated references', async () => {
+test('quick disables reference copying only when requested', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'paperhug-options-'));
   try {
     const first = path.join(dir, 'first.png');
     const second = path.join(dir, 'second.png');
     await Promise.all([writeFile(first, 'first'), writeFile(second, 'second')]);
     const out = path.join(dir, 'card');
-    const { stdout } = await execFileAsync(process.execPath, [
-      cli, 'quick', 'birthday', '--for', 'Test', '--reference', first, '--reference', second,
-      '--no-copy-references', '--force', '--provider', 'none', '--out', out
+    const args = [cli, 'quick', 'birthday', '--for', 'Test', '--reference', first, '--reference', second, '--force', '--provider', 'none', '--out', out];
+
+    const { stdout: defaultStdout } = await execFileAsync(process.execPath, args);
+    const defaultProject = JSON.parse(await readFile(JSON.parse(defaultStdout).project, 'utf8'));
+    assert.deepEqual(defaultProject.references.map((reference) => reference.copiedPath), [
+      path.join('assets', 'reference-1.png'), path.join('assets', 'reference-2.png')
     ]);
-    const parsed = JSON.parse(stdout);
-    const project = JSON.parse(await readFile(parsed.project, 'utf8'));
-    assert.equal(project.references.length, 2);
-    assert.deepEqual(project.references.map((reference) => reference.originalPath), [first, second]);
+    assert.equal(await readFile(path.join(out, 'birthday-for-test', 'assets', 'reference-1.png'), 'utf8'), 'first');
+
+    const noCopyOut = path.join(dir, 'no-copy');
+    const { stdout: noCopyStdout } = await execFileAsync(process.execPath, [
+      ...args.slice(0, -1), noCopyOut, '--no-copy-references'
+    ]);
+    const noCopyProject = JSON.parse(await readFile(JSON.parse(noCopyStdout).project, 'utf8'));
+    assert.equal(noCopyProject.references.length, 2);
+    assert.deepEqual(noCopyProject.references.map((reference) => reference.originalPath), [first, second]);
+    assert.deepEqual(noCopyProject.references.map((reference) => reference.copiedPath), [null, null]);
+    await assert.rejects(readFile(path.join(noCopyOut, 'birthday-for-test', 'assets', 'reference-1.png')));
+    await assert.rejects(readFile(path.join(noCopyOut, 'birthday-for-test', 'assets', 'reference-2.png')));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
